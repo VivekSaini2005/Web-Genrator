@@ -1,15 +1,16 @@
-import React from "react";
+import React from 'react';
 
-const Preview = ({ code }) => {
+const Preview = ({ code, loading }) => {
   return (
-    <div className="h-full bg-white">
-      <div className="p-2 border-b text-sm">Preview</div>
-
-      <iframe
-        title="preview"
-        srcDoc={code}
-        className="w-full h-[calc(100%-40px)]"
-      />
+    <div className="w-full h-full min-h-[400px] bg-white rounded-b-2xl overflow-hidden relative">
+      {loading ? null : (
+        <iframe
+          title="preview"
+          srcDoc={code}
+          className="w-full h-full border-0 absolute inset-0"
+          sandbox="allow-scripts allow-forms allow-popups"
+        />
+      )}
     </div>
   );
 };

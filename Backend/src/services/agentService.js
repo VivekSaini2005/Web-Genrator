@@ -1,87 +1,20 @@
 import { ai } from "../config/gemini.js";
-import { platform } from "../utils/osDetector.js";
-import {
-  executeCommand,
-  executeCommandDeclaration,
-} from "./commandService.js";
 
 export async function runAgent(userProblem) {
-  const History = [];
-
-  History.push({
-    role: "user",
-    parts: [{ text: userProblem }],
+  // console.log("Running agent with problem:", userProblem);
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: userProblem,
+    config: {
+      systemInstruction: `You are an expert AI frontend web developer. Create a full frontend project (HTML, CSS, JS) inside a single file structure suitable for direct iframe rendering.
+Return ONLY valid raw HTML code. Do NOT wrap it in markdown code blocks like \`\`\`html. Start strictly with <!DOCTYPE html> or <html>. Do NOT provide any explanations overhead or trailing conversational text. Ensure it is beautifully styled with modern CSS (e.g. Tailwind via CDN).`,
+    },
   });
+  // console.log("Agent response received");
+  // Optional: strip markdown if the model hallucinates it
+  let code = response.text || "";
+  if (code.startsWith("\`\`\`html")) code = code.replace("\`\`\`html", "").replace("\`\`\`", "").trim();
+  else if (code.startsWith("\`\`\`")) code = code.replace("\`\`\`", "").replace("\`\`\`", "").trim();
 
-  while (true) {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: History,
-      config: {
-        systemInstruction: `You are an expert AI agent specializing in automated frontend web development.
-
-User OS: ${platform}
-
-Follow PLAN → EXECUTE → VALIDATE → REPEAT.
-
-Linux/macOS:
-Use cat << 'EOF'
-
-Windows:
-Use PowerShell Set-Content with @' '@
-
-Always create full frontend project (HTML, CSS, JS).
-
-DO NOT explain, only perform actions.
-`,
-        tools: [
-          {
-            functionDeclarations: [executeCommandDeclaration],
-          },
-        ],
-      },
-    });
-
-    // 🔥 If AI wants to call tool
-    if (response.functionCalls && response.functionCalls.length > 0) {
-      const { name, args } = response.functionCalls[0];
-
-      const result = await executeCommand(args);
-
-      const functionResponsePart = {
-        name: name,
-        response: {
-          result: result,
-        },
-      };
-
-      // add model call
-      History.push({
-        role: "model",
-        parts: [
-          {
-            functionCall: response.functionCalls[0],
-          },
-        ],
-      });
-
-      // add tool result
-      History.push({
-        role: "user",
-        parts: [
-          {
-            functionResponse: functionResponsePart,
-          },
-        ],
-      });
-    } else {
-      // final response
-      History.push({
-        role: "model",
-        parts: [{ text: response.text }],
-      });
-
-      return response.text;
-    }
-  }
+  return code;
 }

@@ -1,18 +1,14 @@
-import React from "react";
+import React from 'react';
 
-const Editor = ({ code, setCode }) => {
+const Editor = ({ code, setCode, loading }) => {
   return (
-    <div className="h-full bg-[#0d1117] text-green-400">
-      <div className="p-2 border-b border-gray-700 text-sm">
-        editor.js
-      </div>
-
-      <textarea
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        className="w-full h-[calc(100%-40px)] p-3 bg-transparent outline-none font-mono text-sm"
-      />
-    </div>
+    <textarea
+      value={loading ? "" : code}
+      onChange={(e) => setCode(e.target.value)}
+      className="w-full h-full min-h-[400px] p-6 bg-transparent text-emerald-300 font-mono text-sm resize-none outline-none focus:ring-0 leading-relaxed"
+      placeholder={loading ? "" : "Generated code will appear here..."}
+      spellCheck="false"
+    />
   );
 };
 
