@@ -2,8 +2,8 @@ import React from 'react';
 
 const PromptBar = ({ prompt, setPrompt, loading, generateCode }) => {
   return (
-    <div className="w-full p-4 relative z-20">
-      <div className="w-full mx-auto flex items-end gap-3 bg-gray-800/90 backdrop-blur-xl border border-gray-700/60 p-2 rounded-2xl shadow-xl focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all duration-300">
+    <div className="w-full p-2 md:p-4 relative z-20">
+      <div className="w-full mx-auto flex items-end gap-2 md:gap-3 bg-gray-800/95 backdrop-blur-2xl border border-gray-700/80 p-1.5 md:p-2 rounded-2xl shadow-2xl focus-within:border-emerald-500/60 focus-within:shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all duration-300">
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -14,7 +14,7 @@ const PromptBar = ({ prompt, setPrompt, loading, generateCode }) => {
             }
           }}
           placeholder="Type your prompt here... (Press Enter to send)"
-          className="flex-1 max-h-40 min-h-[44px] py-3 px-4 bg-transparent outline-none resize-none text-gray-100 placeholder-gray-400"
+          className="flex-1 max-h-40 min-h-[44px] py-2.5 px-3 md:py-3 md:px-4 bg-transparent outline-none resize-none text-gray-100 placeholder-gray-400 text-[15px] leading-relaxed"
           disabled={loading}
           rows={1}
         />
@@ -22,7 +22,7 @@ const PromptBar = ({ prompt, setPrompt, loading, generateCode }) => {
         <button
           onClick={generateCode}
           disabled={loading || !prompt.trim()}
-          className="shrink-0 p-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center h-[52px] w-[52px]"
+          className="shrink-0 p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center h-[46px] w-[46px] md:h-[52px] md:w-[52px]"
         >
           {loading ? (
             <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
