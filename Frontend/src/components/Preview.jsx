@@ -2,7 +2,7 @@ import React from 'react';
 
 const Preview = ({ code, loading }) => {
   return (
-    <div className="w-full h-full min-h-[400px] bg-white rounded-b-2xl overflow-hidden relative">
+    <div className="w-full h-full min-h-[500px] bg-white overflow-hidden relative">
       {loading ? null : (
         <iframe
           title="preview"

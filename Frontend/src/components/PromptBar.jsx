@@ -2,8 +2,8 @@ import React from 'react';
 
 const PromptBar = ({ prompt, setPrompt, loading, generateCode }) => {
   return (
-    <div className="p-4 bg-gradient-to-t from-gray-900 to-transparent sticky bottom-0 z-20">
-      <div className="max-w-4xl mx-auto flex items-end gap-3 bg-gray-800/80 backdrop-blur-xl border border-gray-700/60 p-2 rounded-2xl shadow-2xl focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all duration-300">
+    <div className="w-full p-4 relative z-20">
+      <div className="w-full mx-auto flex items-end gap-3 bg-gray-800/90 backdrop-blur-xl border border-gray-700/60 p-2 rounded-2xl shadow-xl focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all duration-300">
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
