@@ -10,12 +10,12 @@ const EmptyState = ({ setPrompt }) => {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-fade-in overflow-y-auto">
-      <div className="relative group mb-8">
+      {/* <div className="relative group mb-8">
         <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
         <div className="relative w-24 h-24 bg-gray-900 ring-1 ring-gray-800 flex items-center justify-center rounded-full">
           <span className="text-5xl">✨</span>
         </div>
-      </div>
+      </div> */}
       <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">What do you want to build?</h2>
       <p className="text-gray-400 md:text-lg max-w-2xl text-center leading-relaxed">
         Describe your dream interface, component, or entire page, and let our AI generate the code instantly.
