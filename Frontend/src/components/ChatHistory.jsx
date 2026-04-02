@@ -1,45 +1,58 @@
 import React from 'react';
 
 const ChatHistory = ({ messages }) => {
+  if (!messages || messages.length === 0) return null;
+
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col w-full pb-10 space-y-2">
       {messages.map((msg, idx) => {
         const isUser = msg.role === 'user';
+        
         return (
-          <div key={idx} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
-            
-            {/* AI Avatar */}
-            {!isUser && (
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mr-3 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.15)] mt-1">
-                <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                </svg>
-              </div>
-            )}
-
-            {/* Message Bubble */}
-            <div className={`p-4 rounded-2xl max-w-[85%] shadow-lg text-[15px] leading-relaxed relative ${
-              isUser 
-                ? 'bg-gradient-to-br from-emerald-600 to-emerald-500 text-white rounded-tr-sm shadow-emerald-900/20' 
-                : 'bg-gray-800/80 border border-gray-700/60 text-gray-200 rounded-tl-sm backdrop-blur-md'
+          <div 
+            key={idx} 
+            className={`w-full flex justify-center animate-fadeIn ${
+              isUser ? 'py-6' : 'py-10 border-y border-white/[0.03] bg-white/[0.02] shadow-inner'
+            }`}
+          >
+            <div className={`w-full flex gap-6 md:gap-8 px-6 md:px-0 ${
+              isUser ? 'max-w-[640px]' : 'max-w-[720px]'
             }`}>
-              <span className="whitespace-pre-wrap">{msg.content}</span>
               
-              {/* Optional dynamic active marker for AI */}
-              {!isUser && idx === messages.length - 1 && (
-                <span className="inline-block w-1.5 h-1.5 ml-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              )}
-            </div>
-
-            {/* User Avatar */}
-            {isUser && (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 border border-indigo-400/30 flex items-center justify-center ml-3 shrink-0 shadow-lg mt-1">
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
+              {/* Avatar */}
+              <div className="shrink-0 mt-1">
+                {isUser ? (
+                  <div className="w-9 h-9 rounded-lg bg-slate-800 text-slate-200 flex items-center justify-center text-sm font-bold shadow-sm border border-white/10">
+                    U
+                  </div>
+                ) : (
+                  <div className="w-9 h-9 rounded-lg bg-blue-600/90 text-white flex items-center justify-center shadow-md border border-white/10">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                  </div>
+                )}
               </div>
-            )}
-            
+
+              {/* Message Text Block */}
+              <div className="flex-1 min-w-0">
+                <div 
+                  className={`text-[16px] md:text-[17px] leading-[1.8] md:leading-[1.9] tracking-[0.01em] whitespace-pre-wrap ${
+                    isUser 
+                      ? 'text-slate-100 font-medium' 
+                      : 'text-slate-300 font-normal leading-relaxed'
+                  }`}
+                >
+                  {msg.content}
+                </div>
+                
+                {/* Optional dynamic cursor/indicator for the latest AI message */}
+                {!isUser && idx === messages.length - 1 && (
+                  <span className="inline-block w-2 h-4 mt-3 bg-blue-500/50 animate-pulse rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+                )}
+              </div>
+              
+            </div>
           </div>
         );
       })}
