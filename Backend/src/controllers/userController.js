@@ -1,4 +1,14 @@
-import { findUserById, updateUserProfile } from "../models/userModel.js";
+import {
+  findUserById,
+  updateUserName,
+  updateUserAvatar,
+  updateUserNameAndAvatar,
+} from "../models/userModel.js";
+import {
+  getGenerationsByUser,
+  getGenerationById,
+  deleteGeneration,
+} from "../models/generationModel.js";
 
 // ─────────────────────────────────────────────
 // GET /api/user/profile
@@ -78,11 +88,20 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    // ── Perform update ────────────────────────
-    const updatedUser = await updateUserProfile(req.user.id, {
-      name: name !== undefined ? name.trim() : undefined,
-      avatar_url,
-    });
+    // ── Perform update ────────────────────────────────
+    // Call the right SQL function based on which fields were provided
+    let updatedUser;
+
+    if (name !== undefined && avatar_url !== undefined) {
+      // Both fields sent — update both in one SQL query
+      updatedUser = await updateUserNameAndAvatar(req.user.id, name.trim(), avatar_url);
+    } else if (name !== undefined) {
+      // Only name was sent — update name only
+      updatedUser = await updateUserName(req.user.id, name.trim());
+    } else {
+      // Only avatar_url was sent — update avatar only
+      updatedUser = await updateUserAvatar(req.user.id, avatar_url);
+    }
 
     // Shouldn't happen, but guard against unexpected DB miss
     if (!updatedUser) {
@@ -103,6 +122,103 @@ export const updateProfile = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: "Failed to update profile.",
+    });
+  }
+};
+
+
+// ─────────────────────────────────────────────
+// GET /api/user/generations
+// Returns paginated generation history for the
+// authenticated user (most recent first).
+// Query params: ?limit=20&offset=0
+// ─────────────────────────────────────────────
+export const getGenerationHistory = async (req, res) => {
+  try {
+    // Support pagination via query params — default 20 per page
+    const limit  = Math.min(parseInt(req.query.limit)  || 20, 100); // cap at 100
+    const offset = Math.max(parseInt(req.query.offset) || 0,  0);
+
+    const generations = await getGenerationsByUser(req.user.id, limit, offset);
+
+    return res.status(200).json({
+      success: true,
+      count: generations.length,
+      limit,
+      offset,
+      generations, // [ { id, prompt, created_at } ] — no output_code for list efficiency
+    });
+
+  } catch (error) {
+    console.error("[USER] Generation history error:", error.message);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to fetch generation history.",
+    });
+  }
+};
+
+
+// ─────────────────────────────────────────────
+// GET /api/user/generations/:id
+// Returns a single generation with full output_code.
+// Used when re-opening a past generation.
+// ─────────────────────────────────────────────
+export const getSingleGeneration = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const generation = await getGenerationById(id, req.user.id);
+
+    if (!generation) {
+      return res.status(404).json({
+        success: false,
+        error: "Generation not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      generation, // Full row including output_code
+    });
+
+  } catch (error) {
+    console.error("[USER] Get generation error:", error.message);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to fetch generation.",
+    });
+  }
+};
+
+
+// ─────────────────────────────────────────────
+// DELETE /api/user/generations/:id
+// Delete a specific generation owned by the user.
+// ─────────────────────────────────────────────
+export const deleteGenerationHandler = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await deleteGeneration(id, req.user.id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        error: "Generation not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Generation deleted successfully.",
+    });
+
+  } catch (error) {
+    console.error("[USER] Delete generation error:", error.message);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to delete generation.",
     });
   }
 };

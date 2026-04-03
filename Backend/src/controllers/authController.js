@@ -62,6 +62,31 @@ const generateRefreshToken = (user) =>
     { expiresIn: REFRESH_TOKEN_EXPIRY }
   );
 
+/**
+ * Set the refresh token as a secure httpOnly cookie.
+ * httpOnly = JavaScript cannot read it (XSS protection)
+ * sameSite = 'lax' works in Postman and same-origin browsers
+ */
+const setRefreshCookie = (res, token) => {
+  res.cookie("refreshToken", token, {
+    httpOnly: true,                       // Cannot be accessed by JS — XSS safe
+    secure: process.env.NODE_ENV === "production", // HTTPS only in production
+    sameSite: "lax",                      // Works in Postman + same-site browsers
+    maxAge: REFRESH_TOKEN_EXPIRY_MS,      // 7 days (in milliseconds)
+  });
+};
+
+/**
+ * Clear the refresh token cookie on logout.
+ */
+const clearRefreshCookie = (res) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+};
+
 
 // ─────────────────────────────────────────────
 // CONTROLLER: REGISTER
@@ -96,26 +121,32 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     // ── Create User in DB ─────────────────────
-    const newUser = await createUser({
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      password: hashedPassword,
-      provider: "local",
-    });
+    const newUser = await createUser(
+      name.trim(),                       // $1 name
+      email.toLowerCase().trim(),        // $2 email
+      hashedPassword,                    // $3 password (bcrypt hashed)
+      "local",                           // $4 provider
+      null                               // $5 avatar_url (none on registration)
+    );
 
     // ── Generate Tokens ───────────────────────
-    const accessToken = generateAccessToken(newUser);
+    const accessToken  = generateAccessToken(newUser);
     const refreshToken = generateRefreshToken(newUser);
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
+    const expiresAt    = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
 
-    // Persist the refresh token in the sessions table
+    // Save refresh token to sessions table
     await storeRefreshToken(newUser.id, refreshToken, expiresAt);
 
+    // Set refresh token as httpOnly cookie
+    // In Postman: visible under Cookies tab after this request
+    setRefreshCookie(res, refreshToken);
+
     // ── Respond ───────────────────────────────
+    // accessToken goes in the body — store it in memory on the frontend
+    // refreshToken is in the cookie — do NOT store it in localStorage
     return successResponse(res, 201, "Account created successfully.", {
-      user: newUser,       // password is excluded by createUser's RETURNING clause
+      user: newUser,
       accessToken,
-      refreshToken,
     });
 
   } catch (error) {
@@ -166,12 +197,15 @@ export const login = async (req, res) => {
     }
 
     // ── Generate Tokens ───────────────────────
-    const accessToken = generateAccessToken(user);
+    const accessToken  = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
+    const expiresAt    = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
 
-    // Persist the new session
+    // Save new session to DB
     await storeRefreshToken(user.id, refreshToken, expiresAt);
+
+    // Set refresh token as httpOnly cookie
+    setRefreshCookie(res, refreshToken);
 
     // Strip password before sending user object
     const { password: _removed, ...safeUser } = user;
@@ -180,7 +214,7 @@ export const login = async (req, res) => {
     return successResponse(res, 200, "Login successful.", {
       user: safeUser,
       accessToken,
-      refreshToken,
+      // refreshToken is in the cookie — not in the body
     });
 
   } catch (error) {
@@ -193,19 +227,23 @@ export const login = async (req, res) => {
 // ─────────────────────────────────────────────
 // CONTROLLER: LOGOUT
 // POST /api/auth/logout
-// Body: { refreshToken }
+// Reads refreshToken from cookie (preferred) or body (fallback)
 // ─────────────────────────────────────────────
 export const logout = async (req, res) => {
   try {
-    const { refreshToken: token } = req.body;
+    // Read token from cookie first, fall back to request body
+    // Cookie = normal frontend flow | Body = Postman / manual API call
+    const token = req.cookies?.refreshToken || req.body?.refreshToken;
 
     if (!token) {
       return errorResponse(res, 400, "Refresh token is required.");
     }
 
-    // Invalidate the session by deleting the token from the DB
-    // This ensures the refresh token can never be reused again
+    // Delete the session from DB — token can never be reused
     await deleteRefreshToken(token);
+
+    // Clear the cookie from the browser
+    clearRefreshCookie(res);
 
     return successResponse(res, 200, "Logged out successfully.");
 
@@ -219,11 +257,12 @@ export const logout = async (req, res) => {
 // ─────────────────────────────────────────────
 // CONTROLLER: REFRESH TOKEN
 // POST /api/auth/refresh
-// Body: { refreshToken }
+// Body: { refreshToken } OR cookie named 'refreshToken'
 // ─────────────────────────────────────────────
 export const refreshToken = async (req, res) => {
   try {
-    const { refreshToken: token } = req.body;
+    // Cookie = normal flow | Body = Postman testing
+    const token = req.cookies?.refreshToken || req.body?.refreshToken;
 
     if (!token) {
       return errorResponse(res, 400, "Refresh token is required.");
@@ -307,22 +346,25 @@ export const googleLogin = async (req, res) => {
     } else {
       // ── New user: auto-create account ────────
       // No password set — provider = 'google'
-      user = await createUser({
-        name: name || email.split("@")[0], // Fallback to email prefix if Google name missing
-        email: email.toLowerCase(),
-        password: null,                    // Google users never have a password
-        provider: "google",
-        avatar_url: avatar_url || null,
-      });
+      user = await createUser(
+        name || email.split("@")[0],  // $1 name (fallback to email prefix)
+        email.toLowerCase(),          // $2 email
+        null,                         // $3 password (Google users have no password)
+        "google",                     // $4 provider
+        avatar_url || null            // $5 avatar_url (Google profile photo)
+      );
     }
 
     // ── Issue Tokens ──────────────────────────
-    const accessToken = generateAccessToken(user);
+    const accessToken  = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
+    const expiresAt    = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
 
     // Store refresh token in sessions table
     await storeRefreshToken(user.id, refreshToken, expiresAt);
+
+    // Set refresh token as httpOnly cookie
+    setRefreshCookie(res, refreshToken);
 
     // Strip password field if somehow present
     const { password: _removed, ...safeUser } = user;
@@ -331,7 +373,7 @@ export const googleLogin = async (req, res) => {
     return successResponse(res, 200, "Google login successful.", {
       user: safeUser,
       accessToken,
-      refreshToken,
+      // refreshToken is in the cookie
     });
 
   } catch (error) {

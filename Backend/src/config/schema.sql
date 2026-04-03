@@ -1,36 +1,51 @@
 -- ============================================================
--- AI SaaS Web Generator — PostgreSQL Database Schema
--- Compatible with: pgAdmin 4 / PostgreSQL 14+
--- Run this file once to set up your full database schema.
+-- AI Web Generator — Full Database Schema
+-- pgAdmin 4 / PostgreSQL 14+
+-- ============================================================
+-- Tables:
+--   1. users       → registered accounts (local + Google OAuth)
+--   2. sessions    → refresh tokens for JWT auth
+--   3. generations → AI-generated HTML (saved per user or guest)
 -- ============================================================
 
--- Enable UUID generation (required for gen_random_uuid())
+
+-- Enable UUID support (needed for gen_random_uuid())
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 
 -- ============================================================
--- TABLE: users
--- Stores all registered users (local + Google OAuth)
+-- TABLE 1: users
 -- ============================================================
-CREATE TABLE IF NOT EXISTS users (
+-- Stores everyone who registers or logs in via Google.
+-- password is NULL for Google OAuth users (they have no password).
+-- provider tells us how the account was created: 'local' or 'google'
+-- ============================================================
+
+CREATE TABLE users (
   id          UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   name        VARCHAR(100)  NOT NULL,
   email       VARCHAR(255)  NOT NULL UNIQUE,
-  password    TEXT,                         -- NULL for Google OAuth users
+  password    TEXT,
   avatar_url  TEXT,
-  provider    VARCHAR(20)   NOT NULL DEFAULT 'local' CHECK (provider IN ('local', 'google')),
+  provider    VARCHAR(20)   NOT NULL DEFAULT 'local'
+                            CHECK (provider IN ('local', 'google')),
   created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 
--- Index: speed up login lookups by email
-CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+-- Makes login lookups fast (we search by email every login)
+CREATE INDEX idx_users_email ON users (email);
 
 
 -- ============================================================
--- TABLE: sessions
--- Stores refresh tokens for JWT auth (one session per login)
+-- TABLE 2: sessions
 -- ============================================================
-CREATE TABLE IF NOT EXISTS sessions (
+-- Stores JWT refresh tokens so users stay logged in.
+-- One row = one active login session.
+-- When a user logs out, their row is deleted from here.
+-- If a user is deleted, all their sessions are auto-deleted (CASCADE).
+-- ============================================================
+
+CREATE TABLE sessions (
   id             UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id        UUID         NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   refresh_token  TEXT         NOT NULL UNIQUE,
@@ -38,61 +53,38 @@ CREATE TABLE IF NOT EXISTS sessions (
   created_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
--- Index: fast session lookup by user
-CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions (user_id);
+-- Makes "find session by user" fast
+CREATE INDEX idx_sessions_user_id ON sessions (user_id);
 
--- Index: fast token validation during refresh
-CREATE INDEX IF NOT EXISTS idx_sessions_refresh_token ON sessions (refresh_token);
+-- Makes "validate refresh token" fast
+CREATE INDEX idx_sessions_refresh_token ON sessions (refresh_token);
 
 
 -- ============================================================
--- TABLE: projects
--- Each user can have multiple saved projects
+-- TABLE 3: generations
 -- ============================================================
-CREATE TABLE IF NOT EXISTS projects (
-  id          UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID          NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  title       VARCHAR(255)  NOT NULL DEFAULT 'Untitled Project',
-  created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+-- Saves every AI-generated website (prompt + HTML output).
+-- user_id is NULLABLE:
+--   - Logged-in user  → user_id = their UUID
+--   - Guest (no login) → user_id = NULL
+-- ON DELETE SET NULL = if a user deletes their account,
+--   we keep their generations but set user_id to NULL.
+-- ============================================================
+
+CREATE TABLE generations (
+  id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID         REFERENCES users (id) ON DELETE SET NULL,
+  prompt       TEXT         NOT NULL,
+  current_code TEXT,
+  output_code  TEXT         NOT NULL,
+  created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
--- Index: fetch all projects for a user quickly
-CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects (user_id);
+-- Makes "fetch all generations for a user" fast
+CREATE INDEX idx_generations_user_id ON generations (user_id);
 
 
 -- ============================================================
--- TABLE: prompts
--- Each project holds multiple prompts (chat history)
--- ============================================================
-CREATE TABLE IF NOT EXISTS prompts (
-  id          UUID   PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id  UUID   NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
-  content     TEXT   NOT NULL,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Index: fetch all prompts for a given project
-CREATE INDEX IF NOT EXISTS idx_prompts_project_id ON prompts (project_id);
-
-
--- ============================================================
--- TABLE: generations
--- Stores AI-generated HTML output for each prompt
--- ============================================================
-CREATE TABLE IF NOT EXISTS generations (
-  id           UUID   PRIMARY KEY DEFAULT gen_random_uuid(),
-  prompt_id    UUID   NOT NULL REFERENCES prompts (id) ON DELETE CASCADE,
-  output_code  TEXT   NOT NULL,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Index: fetch generation for a specific prompt
-CREATE INDEX IF NOT EXISTS idx_generations_prompt_id ON generations (prompt_id);
-
-
--- ============================================================
--- SUMMARY
--- Tables  : users, sessions, projects, prompts, generations
--- Cascade : user → sessions, projects → prompts → generations
--- Indexes : email, user_id (sessions, projects), project_id, prompt_id
+-- DONE ✅
+-- Run this entire file once in pgAdmin Query Tool (F5)
 -- ============================================================
