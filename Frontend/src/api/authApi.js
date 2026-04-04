@@ -62,10 +62,10 @@ export const logout = async () => {
 };
 
 /**
- * Get the current user's profile
- * @returns {Object} - The current user's profile data
+ * Fetch the currently logged in user profile
+ * @returns {Object} - The user data
  */
-export const getProfile = async () => {
+export const getMe = async () => {
   try {
     const response = await apiClient.get('/auth/me');
     return response.data.user;

@@ -5,7 +5,9 @@ import ChatHistory from "../components/ChatHistory";
 import EmptyState from "../components/EmptyState";
 import Editor from "../components/Editor";
 import Preview from "../components/Preview";
-import { generateCode as apiGenerateCode } from "../services/api";
+// Removed deprecated services/api import
+import { useAuth } from "../context/AuthContext";
+import * as projectApi from "../api/projectApi";
 
 const Home = () => {
   const [prompt, setPrompt] = useState("");
@@ -16,12 +18,61 @@ const Home = () => {
   const [messages, setMessages] = useState([]);
   const [mobileView, setMobileView] = useState("chat"); // 'chat' or 'editor'
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [chats, setChats] = useState([
-    { id: 1, title: 'Authentication Logic' },
-    { id: 2, title: 'Landing Page UI' },
-    { id: 3, title: 'API Integration' }
-  ]);
-  const [activeChatId, setActiveChatId] = useState(1);
+  const { user } = useAuth();
+  const [chats, setChats] = useState([]);
+  const [activeChatId, setActiveChatId] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      projectApi.getProjects().then(res => {
+        if (res.generations) {
+          const mapped = res.generations.map(g => ({ id: g.id, title: String(g.prompt).substring(0, 40) + '...' }));
+          setChats(mapped);
+        }
+      }).catch(console.error);
+    } else {
+      setChats([]);
+    }
+  }, [user]);
+
+  const handleSelectChat = async (id) => {
+    try {
+      setLoading(true);
+      setActiveChatId(id);
+      const project = await projectApi.getProjectById(id);
+      if (project) {
+        setCode(project.output_code || "");
+        setPrompt("");
+        
+        // Reconstruct the chat history order: Prompt -> Response
+        setMessages([
+          { role: "user", content: project.prompt },
+          { role: "assistant", content: "I've loaded the project from your history. The code has been placed in the editor correctly!" }
+        ]);
+
+        setShowOptions(true);
+        setActiveTab("preview");
+        setMobileView("editor");
+      }
+    } catch (err) {
+      console.error('Failed to load chat/project:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNewChat = async () => {
+    try {
+      await projectApi.createProject(); // Optional trigger if logic expands
+      setShowOptions(false);
+      setMessages([]);
+      setCode("");
+      setPrompt("");
+      setActiveChatId(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const messagesEndRef = useRef(null);
 
@@ -44,11 +95,24 @@ const Home = () => {
     setCode("");
 
     try {
-      const res = await apiGenerateCode(userPrompt, currentCode);
-      setCode(res.data.message);
+      const res = await projectApi.generateCode(userPrompt, currentCode, activeChatId);
+      
+      // Update code view safely
+      setCode(res.code || "");
+      
+      // Refresh sidebar seamlessly to grab the newly saved generation
+      if (user) {
+        projectApi.getProjects().then(resData => {
+           if (resData.generations) {
+             setChats(resData.generations.map(g => ({ id: g.id, title: String(g.prompt).substring(0, 40) + '...' })));
+             if (res.generationId) setActiveChatId(res.generationId);
+           }
+        }).catch(console.error);
+      }
+
       setActiveTab("preview");
       setMobileView("editor"); 
-      setMessages(prev => [...prev, { role: "assistant", content: "I've updated the code based on your request. Check the preview to see the changes!" }]);
+      setMessages(prev => [...prev, { role: "assistant", content: "I've updated the project based on your request. Check the preview to see the changes!" }]);
     } catch (err) {
       console.error(err);
       setCode("Error generating code. Please try again.");
@@ -58,19 +122,14 @@ const Home = () => {
   };
 
   return (
-    <div className="h-screen w-full flex bg-gradient-to-br from-slate-900 via-gray-900 to-black text-slate-100 font-sans overflow-hidden">
+    <div className="h-full w-full flex bg-gradient-to-br from-slate-900 via-gray-900 to-black text-slate-100 font-sans overflow-hidden">
       
       {/* LEFT SIDEBAR (~260px) - Claude Style */}
       <Sidebar 
         chats={chats} 
         activeChatId={activeChatId} 
-        onSelectChat={(id) => setActiveChatId(id)}
-        onNewChat={() => {
-          setShowOptions(false);
-          setMessages([]);
-          setCode("");
-          setPrompt("");
-        }}
+        onSelectChat={handleSelectChat}
+        onNewChat={handleNewChat}
       />
 
       {/* MAIN CONTENT AREA */}
