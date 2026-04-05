@@ -40,7 +40,9 @@ const ChatHistory = ({ messages }) => {
                   className={`text-[16px] md:text-[17px] leading-[1.8] md:leading-[1.9] tracking-[0.01em] whitespace-pre-wrap ${
                     isUser 
                       ? 'text-slate-100 font-medium' 
-                      : 'text-slate-300 font-normal leading-relaxed'
+                      : msg.role === 'error' 
+                        ? 'text-red-400 font-normal leading-relaxed' 
+                        : 'text-slate-300 font-normal leading-relaxed'
                   }`}
                 >
                   {msg.content}

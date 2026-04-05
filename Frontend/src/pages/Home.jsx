@@ -115,7 +115,8 @@ const Home = () => {
       setMessages(prev => [...prev, { role: "assistant", content: "I've updated the project based on your request. Check the preview to see the changes!" }]);
     } catch (err) {
       console.error(err);
-      setCode("Error generating code. Please try again.");
+      setCode(currentCode); // Restore previous code
+      setMessages(prev => [...prev, { role: "error", content: "Failed to generate code. Please check your network and try again." }]);
     } finally {
       setLoading(false);
     }
