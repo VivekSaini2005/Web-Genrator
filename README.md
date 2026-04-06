@@ -330,3 +330,7 @@ This is not just a project —
 This is a **foundation for a real AI product**.
 
 Treat it like production software.
+
+
+## Reset Password add this in production level
+To reset passward click on reset and go in backend terminal click on link then change your pass...

@@ -274,3 +274,19 @@ export const deleteAllUserSessions = async (userId) => {
   await pool.query(sql, values);
   // No return value needed
 };
+
+// ─────────────────────────────────────────────
+// UPDATE a user's password
+// ─────────────────────────────────────────────
+// Called by: POST /api/auth/reset-password/:id/:token
+// ─────────────────────────────────────────────
+export const updateUserPassword = async (id, hashedPassword) => {
+  const sql = `
+    UPDATE users
+    SET password = $1
+    WHERE id = $2
+  `;
+
+  const values = [hashedPassword, id];
+  await pool.query(sql, values);
+};

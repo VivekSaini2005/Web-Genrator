@@ -61,18 +61,7 @@ const Home = () => {
     }
   };
 
-  const handleNewChat = async () => {
-    try {
-      await projectApi.createProject(); // Optional trigger if logic expands
-      setShowOptions(false);
-      setMessages([]);
-      setCode("");
-      setPrompt("");
-      setActiveChatId(null);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
 
   const messagesEndRef = useRef(null);
 
@@ -123,133 +112,59 @@ const Home = () => {
   };
 
   return (
-    <div className="h-full w-full flex bg-gradient-to-br from-slate-900 via-gray-900 to-black text-slate-100 font-sans overflow-hidden">
+    <div className="h-screen w-full flex flex-col md:flex-row bg-bg text-text-primary font-sans overflow-hidden p-4 md:p-6 gap-4 md:gap-6">
       
-      {/* LEFT SIDEBAR (~260px) - Claude Style */}
-      <Sidebar 
-        chats={chats} 
-        activeChatId={activeChatId} 
-        onSelectChat={handleSelectChat}
-        onNewChat={handleNewChat}
-      />
+      {/* SECTION 1: SIDEBAR (LEFT) - Hidden on mobile, visible from md up */}
+      <div className="hidden md:flex flex-col w-64 flex-none h-full overflow-hidden">
+        <Sidebar 
+          chats={chats} 
+          activeChatId={activeChatId} 
+          onSelectChat={handleSelectChat}
+        />
+      </div>
 
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex relative overflow-hidden bg-transparent">
-          
-          {/* CHAT AREA (flex-1, centered content) */}
-          <section className={`flex-1 flex flex-col relative transition-all duration-300 w-full ${showOptions && mobileView === 'editor' ? 'hidden md:flex' : 'flex'}`}>
-             
-             {/* Header */}
-             <header className="h-14 flex justify-between items-center px-6 sticky top-0 z-10 bg-slate-900/60 backdrop-blur-xl border-b border-white/5 md:border-none">
-                 <div className="font-semibold text-sm text-gray-400 flex items-center gap-3">
-                    <svg className="w-4 h-4 text-emerald-500 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    <span className="md:hidden">AI Web Generator</span>
-                 </div>
-                 {showOptions && (
-                    <button 
-                      onClick={() => setMobileView("editor")}
-                      className="md:hidden px-4 py-2 bg-[#2d2d30] text-gray-200 rounded-lg text-sm font-medium hover:bg-[#3d3d40] transition-colors"
-                    >
-                      View Code
-                    </button>
-                 )}
-             </header>
-
-             {/* Messages Area with breathing space */}
-             <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar pb-40">
-                <div className="max-w-3xl mx-auto px-6 md:px-8 w-full h-full">
-                    {!showOptions ? (
-                        <div className="h-full flex flex-col justify-center pb-24">
-                           <EmptyState setPrompt={setPrompt} />
-                        </div>
-                    ) : (
-                        <div className="py-8 space-y-6">
-                            <ChatHistory messages={messages} />
-                            <div ref={messagesEndRef} className="h-12" />
-                        </div>
-                    )}
-                </div>
-             </div>
-
-             {/* Fixed Bottom Input Bar */}
-             <div className="absolute bottom-0 left-0 right-0 pt-20 pb-8 px-6 bg-gradient-to-t from-black via-black/80 to-transparent z-20 pointer-events-none">
-                <div className="max-w-3xl mx-auto pointer-events-auto">
-                    <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-3xl border border-white/10">
-                        <PromptBar
-                          prompt={prompt}
-                          setPrompt={setPrompt}
-                          loading={loading}
-                          generateCode={handleGenerateCode}
-                        />
+      {/* SECTION 2: CHAT + PROMPT (CENTER) - Always visible */}
+      <section className="flex-1 flex flex-col min-w-0 bg-surface/30 rounded-[2.5rem] border border-border/40 relative shadow-2xl shadow-black/20 overflow-hidden h-full">
+         {/* Messages Area */}
+         <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar pb-32">
+            <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 h-full flex flex-col">
+                {!showOptions ? (
+                    <div className="flex-1 flex flex-col justify-center py-12">
+                       <EmptyState setPrompt={setPrompt} />
                     </div>
-                </div>
-             </div>
-          </section>
-
-          {/* RIGHT ARTIFACT PANE (Editor/Preview) */}
-          {showOptions && (
-              <section className={`w-full md:w-[45%] lg:w-[50%] max-w-[950px] border-l border-white/10 bg-slate-950 flex flex-col shadow-2xl z-30 transition-all duration-300 ${mobileView === 'chat' ? 'hidden md:flex' : 'flex'}`}>
-                 {/* Tabs Header inside Artifact */}
-                 <header className="h-14 border-b border-white/10 flex items-center justify-between px-4 lg:px-6 bg-slate-950 flex-shrink-0">
-                    <div className="md:hidden flex items-center">
-                        <button 
-                          onClick={() => setMobileView("chat")}
-                          className="p-1 px-2 text-slate-400 hover:text-slate-100 flex items-center gap-2 text-sm font-medium transition-colors"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </button>
+                ) : (
+                    <div className="py-8 space-y-6 flex-1">
+                        <ChatHistory messages={messages} />
+                        <div ref={messagesEndRef} className="h-8" />
                     </div>
+                )}
+            </div>
+         </div>
 
-                    <div className="flex bg-slate-900 p-1 rounded-xl gap-1 border border-white/5 shadow-inner">
-                        <button
-                          onClick={() => setActiveTab("code")}
-                          className={`px-5 py-2 text-sm font-medium rounded-lg transition-all duration-200 transform ${
-                            activeTab === "code" 
-                            ? "bg-slate-800 text-white shadow-lg scale-[1.02]" 
-                            : "text-slate-400 hover:text-slate-200 hover:bg-white/5 hover:scale-[1.01]"
-                          }`}
-                        >
-                          Code
-                        </button>
-                        <button
-                          onClick={() => setActiveTab("preview")}
-                          className={`px-5 py-2 text-sm font-medium rounded-lg transition-all duration-200 transform ${
-                            activeTab === "preview" 
-                            ? "bg-slate-800 text-white shadow-lg scale-[1.02]" 
-                            : "text-slate-400 hover:text-slate-200 hover:bg-white/5 hover:scale-[1.01]"
-                          }`}
-                        >
-                          Preview
-                        </button>
-                    </div>
+         {/* Centered PromptBar */}
+         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-bg via-bg/95 to-transparent z-20">
+            <div className="max-w-3xl mx-auto w-full">
+               <PromptBar
+                 prompt={prompt}
+                 setPrompt={setPrompt}
+                 loading={loading}
+                 generateCode={handleGenerateCode}
+               />
+            </div>
+         </div>
+      </section>
 
-                    <div className="hidden sm:flex gap-1.5 items-center">
-                        <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
-                        <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
-                        <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
-                    </div>
-                 </header>
-
-                 {/* Content Space */}
-                 <div className="flex-1 relative overflow-hidden bg-[#1e1e1e]">
-                    {loading && (
-                        <div className="absolute inset-0 z-10 p-6 flex flex-col gap-4 bg-[#1e1e1e]">
-                            <div className="w-3/4 h-8 bg-white/5 rounded-md animate-pulse"></div>
-                            <div className="w-1/2 h-6 bg-white/5 rounded-md animate-pulse delay-100"></div>
-                            <div className="w-full h-32 bg-white/5 rounded-md animate-pulse delay-200"></div>
-                        </div>
-                    )}
-                    <div className={`absolute inset-0 transition-opacity duration-300 h-full w-full ${loading ? 'opacity-0' : 'opacity-100'}`}>
-                        {activeTab === "code" ? (
-                          <Editor code={code} setCode={setCode} loading={loading} />
-                        ) : (
-                          <Preview code={code} loading={loading} />
-                        )}
-                    </div>
-                 </div>
-              </section>
-          )}
-      </main>
+      {/* SECTION 3: ARTIFACT PANE (RIGHT) - Hidden on mobile/tablet, visible from lg up */}
+      {showOptions && activeTab === 'preview' && (
+          <div className="hidden lg:flex flex-none w-[40%] h-full overflow-hidden">
+             <Preview code={code} loading={loading} />
+          </div>
+      )}
+      {showOptions && activeTab === 'code' && (
+          <div className="hidden lg:flex flex-none w-[40%] h-full overflow-hidden">
+             <Editor code={code} setCode={setCode} loading={loading} />
+          </div>
+      )}
     </div>
   );
 };

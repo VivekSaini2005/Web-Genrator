@@ -31,71 +31,113 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex justify-center py-20 px-4">
-      <div className="max-w-md w-full bg-slate-900 border border-white/10 rounded-2xl p-8 shadow-2xl h-fit">
-        <h2 className="text-2xl font-bold mb-6 text-emerald-400">Your Profile</h2>
-
-        <div className="flex flex-col items-center mb-6">
-          {user?.avatar_url || avatarUrl ? (
-            <img 
-              src={avatarUrl || user.avatar_url} 
-              alt="Avatar" 
-              className="w-24 h-24 rounded-full object-cover border-4 border-slate-800 shadow-lg mb-4"
-              onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl font-bold border-4 border-slate-800 shadow-lg mb-4">
-              {name?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <span className="text-slate-400 text-sm bg-slate-800 px-3 py-1 rounded-full">{user?.provider} provider</span>
+    <div className="min-h-screen w-full flex items-center justify-center bg-bg px-6 py-12 selection:bg-primary/30 text-text-primary">
+      <div className="card w-full max-w-lg">
+        
+        <div className="flex items-center justify-between mb-8 pb-6 border-b border-border/50">
+           <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
+                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              </div>
+              <div>
+                 <h2 className="text-lg font-semibold text-text-primary leading-none mb-1">Account Settings</h2>
+                 <p className="text-xs text-text-secondary opacity-70">Manage your profile and preferences</p>
+              </div>
+           </div>
+           <button 
+              onClick={() => window.history.back()}
+              className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+              title="Go Back"
+           >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+           </button>
         </div>
 
-        {message && <div className="mb-4 text-emerald-400 bg-emerald-400/10 p-3 rounded-lg text-sm text-center">{message}</div>}
-        {error && <div className="mb-4 text-red-400 bg-red-400/10 p-3 rounded-lg text-sm text-center">{error}</div>}
+        <div className="flex flex-col md:flex-row gap-8">
+           {/* Left: Avatar Preview */}
+           <div className="flex flex-col items-center gap-4 shrink-0">
+              <div className="relative group">
+                {user?.avatar_url || avatarUrl ? (
+                  <img 
+                    src={avatarUrl || user.avatar_url} 
+                    alt="Avatar" 
+                    className="w-32 h-32 rounded-2xl object-cover border-4 border-surface shadow-xl ring-1 ring-border group-hover:scale-[1.02] transition-transform"
+                    onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-4xl font-bold border-4 border-surface shadow-xl ring-1 ring-border group-hover:scale-[1.02] transition-transform">
+                    {name?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="px-3 py-1 rounded-full bg-surface border border-border/50 text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+                 {user?.provider || 'Linear'} Account
+              </div>
+           </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Email</label>
-            <input 
-              type="text" 
-              value={user?.email || ''} 
-              disabled
-              className="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2 text-slate-500 cursor-not-allowed"
-            />
-            <p className="text-xs text-slate-500 mt-1">Email cannot be changed.</p>
-          </div>
+           {/* Right: Form fields */}
+           <div className="flex-1 flex flex-col gap-6">
+              {message && <div className="text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 p-4 rounded-xl text-xs font-semibold flex items-center gap-3 animate-fadeIn">
+                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                 {message}
+              </div>}
+              {error && <div className="text-red-400 bg-red-400/10 border border-red-400/20 p-4 rounded-xl text-xs font-semibold flex items-center gap-3 animate-fadeIn">
+                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                 {error}
+              </div>}
 
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Name</label>
-            <input 
-              type="text" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors"
-              placeholder="Your name"
-            />
-          </div>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-text-secondary uppercase tracking-widest mb-1.5 ml-1">Email Address</label>
+                    <input 
+                      type="text" 
+                      value={user?.email || ''} 
+                      disabled
+                      className="input-field opacity-50 cursor-not-allowed bg-bg/50 border-dashed"
+                    />
+                  </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Avatar URL</label>
-            <input 
-              type="url" 
-              value={avatarUrl} 
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              className="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors"
-              placeholder="https://example.com/avatar.jpg"
-            />
-          </div>
+                  <div>
+                    <label className="block text-xs font-bold text-text-secondary uppercase tracking-widest mb-1.5 ml-1">Display Name</label>
+                    <input 
+                      type="text" 
+                      value={name} 
+                      onChange={(e) => setName(e.target.value)}
+                      className="input-field"
+                      placeholder="Your workspace name"
+                    />
+                  </div>
 
-          <button 
-            type="submit" 
-            disabled={loading || (name === user.name && avatarUrl === (user.avatar_url || ''))}
-            className="w-full mt-6 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
-          >
-            {loading ? 'Saving...' : 'Save Changes'}
-          </button>
-        </form>
+                  <div>
+                    <label className="block text-xs font-bold text-text-secondary uppercase tracking-widest mb-1.5 ml-1">Avatar URL</label>
+                    <input 
+                      type="url" 
+                      value={avatarUrl} 
+                      onChange={(e) => setAvatarUrl(e.target.value)}
+                      className="input-field"
+                      placeholder="https://example.com/photo.jpg"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-border/50">
+                   <button 
+                     type="submit" 
+                     disabled={loading || (name === user.name && avatarUrl === (user.avatar_url || ''))}
+                     className="btn-primary w-full disabled:opacity-30 disabled:cursor-not-allowed"
+                   >
+                     {loading ? (
+                        <div className="flex items-center gap-2">
+                           <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                           <span>Saving Changes...</span>
+                        </div>
+                     ) : 'Save Changes'}
+                   </button>
+                </div>
+              </form>
+           </div>
+        </div>
       </div>
     </div>
   );

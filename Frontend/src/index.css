@@ -1,1 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-primary: #6366F1;
+  --color-bg: #0B0F19;
+  --color-surface: #111827;
+  /* We use custom-border to avoid conflict with standard border utility if needed, but in v4 --color-border adds border-border class */
+  --color-border: #1F2937;
+  --color-text-primary: #E5E7EB;
+  --color-text-secondary: #9CA3AF;
+
+  /* Font */
+  --font-sans: 'Inter', sans-serif;
+
+  /* Extended Theme Variables */
+  --radius-DEFAULT: 1.5rem; /* Standard rounded-2xl feel */
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text-primary font-sans transition-colors duration-300;
+  }
+
+  /* Custom Minimalist Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-bg;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full hover:bg-text-secondary transition-colors;
+  }
+
+  /* Selection Style */
+  ::selection {
+    @apply bg-primary/30 text-text-primary;
+  }
+}
+
+@layer components {
+  /* Reusable SaaS UI Classes */
+  .btn-primary {
+    @apply bg-primary text-white font-semibold px-6 py-3 rounded-2xl hover:opacity-90 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary/10 flex items-center justify-center gap-2;
+  }
+  
+  .card {
+    @apply bg-surface/50 border border-border/50 rounded-[2rem] shadow-soft p-8 backdrop-blur-md transition-all duration-300;
+  }
+  
+  .input-field {
+    @apply w-full bg-bg border border-border/50 rounded-2xl px-4 py-3.5 text-text-primary text-sm placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/50 transition-all duration-200;
+  }
+  
+  .artifact-pane {
+    @apply bg-surface p-4 flex flex-col h-full border border-border/50 rounded-[2rem] shadow-soft overflow-hidden transition-all duration-300;
+  }
+
+  .pane-header {
+    @apply text-[10px] font-bold text-text-secondary uppercase tracking-[0.2em] mb-4 px-2 opacity-40 flex items-center gap-2;
+  }
+}

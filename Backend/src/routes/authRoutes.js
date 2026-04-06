@@ -5,6 +5,8 @@ import {
   logout,
   refreshToken,
   googleLogin,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/authController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 
@@ -28,6 +30,12 @@ router.post("/refresh", refreshToken);
 
 // Google OAuth login | Body: { idToken }  ← the credential from Google Sign-In
 router.post("/google", googleLogin);
+
+// Request password reset link | Body: { email }
+router.post("/forgot-password", forgotPassword);
+
+// Reset password with token | Body: { newPassword } | Params: { id, token }
+router.post("/reset-password/:id/:token", resetPassword);
 
 
 // ─────────────────────────────────────────────

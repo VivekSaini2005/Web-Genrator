@@ -2,12 +2,15 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {
   findUserByEmail,
+  findUserById,
   createUser,
   storeRefreshToken,
   findRefreshToken,
   deleteRefreshToken,
+  updateUserPassword,
 } from "../models/userModel.js";
 import { verifyGoogleToken } from "../config/googleClient.js";
+import { sendResetEmail } from "../utils/emailService.js";
 
 // ─────────────────────────────────────────────
 // CONSTANTS
@@ -334,15 +337,10 @@ export const googleLogin = async (req, res) => {
     let user = await findUserByEmail(email.toLowerCase());
 
     if (user) {
-      // ── Existing user: block if registered locally ──
-      // Allow if they previously signed in with Google
-      if (user.provider === "local") {
-        return errorResponse(
-          res, 409,
-          "An account with this email already exists. Please login with your password."
-        );
-      }
-      // Google user exists → just issue new tokens (login flow)
+      // ── Existing user ──
+      // If the user registered locally, we now trust Google's email verification 
+      // and allow them to log in via Google without throwing an error.
+      // We just proceed to issue new tokens (login flow).
     } else {
       // ── New user: auto-create account ────────
       // No password set — provider = 'google'
@@ -379,5 +377,93 @@ export const googleLogin = async (req, res) => {
   } catch (error) {
     console.error("[AUTH] Google login error:", error.message);
     return errorResponse(res, 500, "Google login failed. Please try again.");
+  }
+};
+
+// ─────────────────────────────────────────────
+// CONTROLLER: FORGOT PASSWORD
+// POST /api/auth/forgot-password
+// Body: { email }
+// ─────────────────────────────────────────────
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || !isValidEmail(email)) {
+      return errorResponse(res, 400, "Valid email is required.");
+    }
+
+    const user = await findUserByEmail(email.toLowerCase().trim());
+
+    // We still return true even if user not found to prevent email enumeration
+    if (!user) {
+      return successResponse(res, 200, "If an account exists with this email, a reset link has been sent.");
+    }
+
+    if (user.provider === "google") {
+      return errorResponse(res, 400, "This is a Google-linked account. You cannot reset its password here.");
+    }
+
+    // Stateless token: signed with JWT_SECRET + user's current hashed password
+    const secret = process.env.JWT_SECRET + user.password;
+    const token = jwt.sign({ email: user.email, id: user.id }, secret, {
+      expiresIn: "15m", // Link expires in 15 mins
+    });
+
+    // Assume frontend runs on Vite Default Port or process.env.FRONTEND_URL
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetLink = `${frontendUrl}/reset-password/${user.id}/${token}`;
+
+    await sendResetEmail(user.email, resetLink);
+
+    return successResponse(res, 200, "If an account exists with this email, a reset link has been sent.");
+  } catch (error) {
+    console.error("[AUTH] Forgot password error:", error.message);
+    return errorResponse(res, 500, "Failed to process forgot password request.");
+  }
+};
+
+// ─────────────────────────────────────────────
+// CONTROLLER: RESET PASSWORD
+// POST /api/auth/reset-password/:id/:token
+// Body: { newPassword }
+// ─────────────────────────────────────────────
+export const resetPassword = async (req, res) => {
+  try {
+    const { id, token } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return errorResponse(res, 400, "Password must be at least 6 characters.");
+    }
+
+    const user = await findUserById(id);
+    if (!user) {
+      return errorResponse(res, 400, "Invalid reset link.");
+    }
+    
+    // We need the user's current password for the secret
+    // findUserById doesn't select password, so we look them up by email to get it
+    const fullUser = await findUserByEmail(user.email);
+    if (!fullUser) {
+        return errorResponse(res, 400, "Invalid reset link.");
+    }
+
+    const secret = process.env.JWT_SECRET + fullUser.password;
+
+    try {
+      jwt.verify(token, secret);
+    } catch (err) {
+      return errorResponse(res, 400, "Reset link is invalid or has expired.");
+    }
+
+    // Token is valid. Hash new password and save it
+    const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await updateUserPassword(id, hashedPassword);
+
+    return successResponse(res, 200, "Password has been successfully reset. You can now log in.");
+  } catch (error) {
+    console.error("[AUTH] Reset password error:", error.message);
+    return errorResponse(res, 500, "Failed to reset password.");
   }
 };

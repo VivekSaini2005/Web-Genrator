@@ -6,6 +6,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Navbar from "./components/Navbar";
 
 // Simple placeholders to ensure the app doesn't crash 
@@ -19,33 +21,26 @@ const Placeholder = ({ title }) => (
 function App() {
   return (
     <BrowserRouter>
-      <div className="flex flex-col h-screen overflow-hidden bg-slate-950">
-        {/* Render Navbar globally across all pages */}
-        <div className="flex-none">
-          <Navbar />
-        </div>
-        
-        {/* Main application engine area takes up all remaining space */}
-        <div className="flex-1 relative overflow-hidden">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+      <div className="flex h-screen w-full bg-bg text-text-primary font-sans overflow-hidden">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:id/:token" element={<ResetPassword />} />
 
-            {/* Protected Routes (Requires Auth) */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/profile" element={<Profile />} />
-              {/* Dashboard/Editor/Projects fallback correctly directly back into home because Home explicitly operates as the main engine */}
-              <Route path="/dashboard" element={<Navigate to="/" replace />} />
-              <Route path="/editor" element={<Navigate to="/" replace />} />
-              <Route path="/projects" element={<Navigate to="/" replace />} />
-            </Route>
+          {/* Protected Routes (Requires Auth) */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<Navigate to="/" replace />} />
+            <Route path="/editor" element={<Navigate to="/" replace />} />
+            <Route path="/projects" element={<Navigate to="/" replace />} />
+          </Route>
 
-            {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
+          {/* Catch-all redirect */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
     </BrowserRouter>
   );
