@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import generateRoutes from "./src/routes/generateRoutes.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
+import chatRoutes from "./src/routes/chatRoutes.js";
 import { testDBConnection } from "./src/config/db.js";
 
 // Load environment variables first — before anything else
@@ -14,10 +15,12 @@ const app = express();
 
 // ── Middleware ────────────────────────────────────────────
 app.use(cors({
-  origin: [
-    process.env.CLIENT_URL || "http://localhost:5173",
-    "http://127.0.0.1:5173"
-  ],
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    // You can add more strict checking here for production
+    return callback(null, true);
+  },
   credentials: true, // Required so cookies are sent/received cross-origin
 }));
 
@@ -28,6 +31,7 @@ app.use(cookieParser());     // Parse cookies from incoming requests (needed for
 app.use("/api", generateRoutes);       // POST /api/generate        (public)
 app.use("/api/auth", authRoutes);      // POST /api/auth/*          (public)
 app.use("/api/user", userRoutes);      // GET|PUT /api/user/profile (protected)
+app.use("/api/chats", chatRoutes);     // Chat interactions         (protected)
 
 // ── Health check ──────────────────────────────────────────
 app.get("/", (req, res) => {

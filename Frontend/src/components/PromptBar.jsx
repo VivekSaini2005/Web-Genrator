@@ -1,7 +1,14 @@
-import React, { useRef, useEffect } from 'react';
-import { ArrowUp, Plus, Paperclip, MoreHorizontal } from 'lucide-react';
+import React, { useRef, useEffect, useState } from 'react';
+import { ArrowUp, Plus, Paperclip, MoreHorizontal, Loader2 } from 'lucide-react';
+import { useChat } from '../context/ChatContext';
+import { useAuth } from '../context/AuthContext';
 
-const PromptBar = ({ prompt, setPrompt, loading, generateCode }) => {
+const PromptBar = ({ content = "", setContent = () => {} }) => {
+  const { currentChatId, sendMessage, isGenerating, createNewChat } = useChat();  
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+
+  const isBusy = loading || isGenerating;
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -9,14 +16,34 @@ const PromptBar = ({ prompt, setPrompt, loading, generateCode }) => {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
     }
-  }, [prompt]);
+  }, [content]);
+
+  const handleSend = async (e) => {
+    if (e) e.preventDefault();
+    if (!content || typeof content !== 'string' || !content.trim() || isBusy) return;
+
+    let targetChatId = currentChatId;
+    if (!targetChatId) {
+      const newChat = await createNewChat(content.substring(0, 30));
+      if (!newChat) return; // Wait! If creation failed, don't crash
+      targetChatId = newChat.id;
+    }
+
+    const messageToSend = content;
+    setContent("");
+    setLoading(true);
+
+    try {
+      await sendMessage(messageToSend, targetChatId);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if ((e.key === 'Enter' || e.keyCode === 13) && !e.shiftKey) {
       e.preventDefault();
-      if (!loading && prompt.trim()) {
-        generateCode();
-      }
+      handleSend();
     }
   };
 
@@ -32,26 +59,27 @@ const PromptBar = ({ prompt, setPrompt, loading, generateCode }) => {
 
           <textarea
             ref={textareaRef}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask anything..."
-            className="flex-1 bg-transparent border-none py-2 text-[15px] text-slate-900 dark:text-white focus:ring-0 outline-none resize-none max-h-[200px] overflow-y-auto placeholder:text-slate-400 dark:placeholder:text-slate-500 leading-relaxed font-medium transition-premium"
+            placeholder={!user ? "Login to start chatting..." : "What should I build today?"}
+            className="flex-1 bg-transparent border-none py-2 text-[15px] text-slate-900 dark:text-white focus:ring-0 outline-none resize-none max-h-[200px] overflow-y-auto placeholder:text-slate-400 dark:placeholder:text-slate-500 leading-relaxed font-medium transition-premium disabled:opacity-50"
             rows={1}
-            disabled={loading}
+            disabled={!user || isBusy}
           />
 
           <button
-            onClick={generateCode}
-            disabled={loading || !prompt.trim()}
+            onClick={handleSend}
+            type="button"
+            disabled={!user || isBusy || !content || typeof content !== 'string' || !content.trim()}
             className={`p-2 rounded-xl transition-all shrink-0 flex items-center justify-center mb-0.5 transform-gpu ${
-              prompt.trim() 
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 hover:scale-110 active:scale-90 shadow-lg shadow-black/20 dark:shadow-white/10 rotate-0 hover:rotate-3' 
+              content && typeof content === 'string' && content.trim() && user && !isBusy
+                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 hover:scale-110 active:scale-90 shadow-lg shadow-black/20 dark:shadow-white/10 rotate-0 hover:rotate-3'
                 : 'text-slate-400 dark:text-slate-600 bg-slate-100 dark:bg-white/5 cursor-not-allowed opacity-50'
             }`}
           >
-            {loading ? (
-              <div className={`animate-spin h-5 w-5 border-2 rounded-full ${prompt.trim() ? 'border-white dark:border-slate-950 border-t-transparent' : 'border-slate-400 dark:border-slate-600 border-t-transparent'}`} />
+            {isBusy ? (
+              <Loader2 size={20} strokeWidth={3} className="animate-spin text-white dark:text-slate-950" />
             ) : (
               <ArrowUp size={20} strokeWidth={3} />   
             )}

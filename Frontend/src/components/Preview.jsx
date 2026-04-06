@@ -1,22 +1,43 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import { useChat } from '../context/ChatContext';
 
-const Preview = ({ code, loading }) => {
+const Preview = () => {
+  const { messages } = useChat();
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  if (!messages || messages.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-slate-400">
+        <p className="text-lg font-medium">Start a new conversation</p>
+      </div>
+    );
+  }
+
+  const aiMessages = messages.filter(msg => msg.role !== 'user');
+  const latestAiMessage = aiMessages.length > 0 ? aiMessages[aiMessages.length - 1].content : '';
+
+  if (!latestAiMessage) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-slate-400">
+        <p className="text-lg font-medium">No preview available yet</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="artifact-pane">
-      <div className="pane-header">
-        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-        Live Preview
-      </div>
-      <div className="flex-1 rounded-2xl overflow-hidden shadow-soft bg-white relative">
-        {!loading && (
-          <iframe
-            title="preview"
-            srcDoc={code || "<div style=\"display:flex;height:100%;align-items:center;justify-content:center;color:#666;font-family:sans-serif;text-align:center;padding:20px;\"><div><h2 style=\"margin:0;font-size:24px;\">Nothing to preview yet</h2><p style=\"opacity:0.6;margin-top:8px;\">Enter a prompt to generate code</p></div></div>"}
-            className="w-full h-full bg-white border-0 absolute inset-0"
-            sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"
-          />
-        )}
-      </div>
+    <div className="flex-1 p-4 w-full h-full">
+      <iframe
+        srcDoc={latestAiMessage}
+        className="w-full h-full border-none rounded-xl bg-white"
+        title="Website Preview"
+        sandbox="allow-scripts"
+      />
     </div>
   );
 };

@@ -1,7 +1,12 @@
 import React from 'react';
-import { Zap, Layout, Palette, Sparkles } from 'lucide-react';
+import { Zap, Layout, Palette, Sparkles, LogIn } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const EmptyState = ({ setPrompt }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const suggestions = [
     { text: "A modern food delivery landing page with high-quality images", icon: <Layout size={18} /> },
     { text: "A sleek fintech dashboard with dark mode and glassmorphism", icon: <Palette size={18} /> },
@@ -16,31 +21,41 @@ const EmptyState = ({ setPrompt }) => {
       </div>
 
       <h1 className="text-3xl md:text-3xl font-bold text-white tracking-tight mb-4">
-        What should I build today?
+        {user ? "What should I build today?" : "Welcome to LinearGen"}
       </h1>
 
       <p className="text-slate-400 text-[15px] max-w-md mb-12 font-medium leading-relaxed">
-        Describe your dream website or UI component. LinearGen transforms your ideas into pixel-perfect production code.
+        {user ? "Describe your dream website or UI component. LinearGen transforms your ideas into pixel-perfect production code." : "Log in to start generating pixel-perfect React components, building user interfaces, and organizing your conversations."}
       </p>
 
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
-        {suggestions.map((item, i) => (
-          <button
-            key={i}
-            onClick={() => setPrompt(item.text)}
-            className="group p-4 rounded-2xl bg-white/5 border border-white/5 text-left flex items-start gap-4 hover:bg-white/10 hover:border-white/10 transition-all duration-300 active:scale-[0.98]"
-          >
-            <div className="shrink-0 w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-slate-400 border border-white/5 group-hover:scale-110 group-hover:text-white transition-all duration-500">
-              {item.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-               <p className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors leading-relaxed line-clamp-2">
-                 {item.text}
-               </p>
-            </div>
-          </button>
-        ))}
-      </div>
+      {user ? (
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
+          {suggestions.map((item, i) => (
+            <button
+              key={i}
+              onClick={() => setPrompt && setPrompt(item.text)}
+              className="group p-4 rounded-2xl bg-white/5 border border-white/5 text-left flex items-start gap-4 hover:bg-white/10 hover:border-white/10 transition-all duration-300 active:scale-[0.98]"
+            >
+              <div className="shrink-0 w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-slate-400 border border-white/5 group-hover:scale-110 group-hover:text-white transition-all duration-500">
+                {item.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                 <p className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors leading-relaxed line-clamp-2">
+                   {item.text}
+                 </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <button
+          onClick={() => navigate('/login')}
+          className="flex items-center gap-3 px-8 py-3.5 bg-white text-slate-950 rounded-2xl font-bold hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5"
+        >
+          <LogIn size={20} strokeWidth={2.5} />
+          Sign In to Continue
+        </button>
+      )}
     </div>
   );
 };

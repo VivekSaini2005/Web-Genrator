@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { User, Sparkles, MoreHorizontal } from 'lucide-react';
+import { useChat } from '../context/ChatContext';
 
-const ChatHistory = ({ messages, loading }) => {
+const ChatHistory = ({ loading }) => {
+  const { messages, isGenerating } = useChat();
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isGenerating]);
+
   if (!messages || messages.length === 0) return null;
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-10 pb-40 transition-all duration-500">
+    <div className="w-full flex w-full flex-col gap-10 pb-20 transition-all duration-500">
       {messages.map((msg, idx) => {
         const isUser = msg.role === 'user';
         const isError = msg.role === 'error';
@@ -46,7 +54,7 @@ const ChatHistory = ({ messages, loading }) => {
         );
       })}
 
-      {loading && (
+      {isGenerating && (
         <div className="flex justify-start animate-in fade-in duration-300">
           <div className="flex gap-5 items-start">
             <div className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center bg-white text-slate-950 shadow-xl border border-white/10">
@@ -60,6 +68,9 @@ const ChatHistory = ({ messages, loading }) => {
           </div>
         </div>
       )}
+
+      {/* Auto scroll anchor */}
+      <div ref={endRef} className="h-4" />
     </div>
   );
 };

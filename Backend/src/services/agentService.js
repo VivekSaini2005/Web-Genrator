@@ -4,7 +4,7 @@
 // It sends the user's prompt and gets back HTML code.
 // ─────────────────────────────────────────────
 
-import { ai } from "../config/gemini.js";
+import { ai, systemInstruction } from "../config/gemini.js";
 
 
 // ─────────────────────────────────────────────
@@ -49,18 +49,6 @@ Now update it based on this request: ${userPrompt}
   // We send the message and a "system instruction" which tells
   // the AI how to behave (like a rule it must follow).
 
-  const systemInstruction = `
-You are an expert AI frontend web developer.
-Create a full frontend project (HTML, CSS, JS) inside a single HTML file.
-The file must work when loaded directly in an iframe.
-
-Rules you MUST follow:
-- Return ONLY raw HTML code. Nothing else.
-- Do NOT wrap it in markdown like \`\`\`html — just plain HTML.
-- Always start with <!DOCTYPE html> or <html>.
-- Do NOT add any text explanation before or after the code.
-- Style it beautifully using modern CSS or Tailwind CSS via CDN.
-  `.trim();
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
@@ -96,6 +84,22 @@ Rules you MUST follow:
     throw new Error("AI returned an empty response. Please try again.");
   }
 
-  // Return the clean HTML string
+  // Ensure valid HTML or auto-wrap
+  const lowerCode = code.toLowerCase();
+  if (!lowerCode.includes("<html")) {
+    code = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generated Content</title>
+</head>
+<body>
+  ${code}
+</body>
+</html>`;
+  }
+
+  // Return the raw HTML string
   return code;
 }
