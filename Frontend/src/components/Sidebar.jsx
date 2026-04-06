@@ -1,105 +1,201 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { 
+  Plus,
+  MessageSquare,
+  LogOut, 
+  ChevronLeft, 
+  ChevronRight,
+  Settings,
+  Zap,
+  History,
+  Trash2,
+  Search
+} from 'lucide-react';
 
-const Sidebar = ({ chats = [], activeChatId, onSelectChat }) => {
+const Sidebar = ({ chats = [], activeChatId, onSelectChat, onNewChat, onDeleteChat }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
+  const filteredChats = chats.filter(chat => 
+    chat.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <aside className="w-64 bg-surface border-r border-border h-full p-4 flex flex-col text-text-primary">
-      
-      {/* Sidebar Header */}
-      <div className="flex flex-col gap-1 mb-8 px-2">
-         <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
-               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
-            <span className="text-sm font-bold tracking-tight uppercase">LinearGen</span>
-         </div>
-         <h1 className="text-xs font-medium text-text-secondary opacity-60 ml-1">AI Web Generator</h1>
-      </div>
+    <aside 
+      className={`relative h-full bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-white/10 flex flex-col transition-all duration-300 ease-in-out ${
+        isCollapsed ? 'w-20' : 'w-64'
+      } z-50`}
+    >
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute -right-3 top-10 w-6 h-6 bg-slate-900 dark:bg-white border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center text-white dark:text-slate-950 shadow-lg hover:scale-125 hover:shadow-xl active:scale-90 z-50 group transition-all duration-300 transform-gpu"
+      >
+        {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+      </button>
 
-      {/* History Section */}
-      <div className="flex-1 overflow-y-auto space-y-1.5 custom-scrollbar -mx-2 px-2">
-        <div className="text-[10px] font-bold text-text-secondary uppercase tracking-[0.2em] px-3 mb-3 opacity-40">
-           Recent Projects
+      {/* Header Branding */}
+      <div className={`p-6 mb-2 flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''} transition-all duration-500`}>
+        <div 
+          onClick={() => navigate('/')}
+          className="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center shadow-lg shadow-black/5 shrink-0 hover:rotate-12 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer"
+        >
+          <Zap size={24} fill="currentColor" />
         </div>
-        
-        {!user ? (
-          <div className="px-3 py-10 text-center">
-            <p className="text-[11px] font-medium text-text-secondary opacity-50 leading-relaxed px-2 tracking-tight">
-              Login to save your projects
-            </p>
+        {!isCollapsed && (
+          <div className="overflow-hidden fade-in">
+            <span className="text-lg font-bold tracking-tighter text-slate-900 dark:text-white block leading-none transition-colors duration-300">LinearGen</span>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1 block">Pro v1.0</span>
           </div>
-        ) : chats.length === 0 ? (
-          <div className="px-3 py-10 text-center text-text-secondary opacity-50">
-            <p className="text-[11px] font-medium leading-relaxed px-2 tracking-tight">
-              No projects yet. Start generating!
-            </p>
-          </div>
-        ) : (
-          chats.map(chat => {
-            const isActive = activeChatId ? chat.id === activeChatId : false; 
-
-            return (
-              <button
-                key={chat.id}
-                onClick={() => onSelectChat && onSelectChat(chat.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-2xl text-sm transition-all cursor-pointer text-left group ${
-                  isActive 
-                    ? 'bg-bg text-text-primary shadow-sm ring-1 ring-border/50' 
-                    : 'text-text-secondary hover:bg-bg/50 hover:text-text-primary'
-                }`}
-              >
-                <svg className={`w-4 h-4 flex-shrink-0 transition-colors ${isActive ? 'text-primary' : 'text-text-secondary/40 group-hover:text-text-secondary'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                </svg>
-                <span className="truncate text-xs font-medium">{chat.title}</span>
-              </button>
-            )
-          })
         )}
       </div>
 
-      {/* User Section */}
-      <div className="mt-auto pt-6 border-t border-border/50">
-         {user ? (
-            <div className="flex items-center gap-2">
-               <Link 
-                 to="/profile" 
-                 className="flex-1 flex items-center gap-3 p-2.5 rounded-2xl hover:bg-bg transition-all group overflow-hidden border border-transparent hover:border-border/50"
-               >
-                  <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold border border-primary/20 flex-shrink-0 group-hover:scale-105 transition-transform">
-                    {user.avatar_url ? (
-                      <img src={user.avatar_url} alt="Avatar" className="w-full h-full rounded-xl object-cover" />
-                    ) : (
-                      user.name?.charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <div className="truncate">
-                    <div className="text-sm font-semibold text-text-primary truncate">{user.name}</div>
-                    <div className="text-[10px] uppercase font-bold tracking-widest text-text-secondary opacity-50">Settings</div>
-                  </div>
-               </Link>
-               <button 
-                  onClick={handleLogout}
-                  className="p-2.5 text-text-secondary hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all border border-transparent hover:border-red-400/20"
-                  title="Logout"
-               >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-               </button>
+      {/* New Chat Button */}
+      {user && (
+        <div className="px-4 mb-2">
+          <button
+            onClick={onNewChat}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-900/5 dark:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 hover:bg-slate-900/10 dark:hover:bg-white/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 group ${isCollapsed ? 'justify-center p-3' : ''}`}
+          >
+            <Plus size={isCollapsed ? 20 : 18} strokeWidth={2.5} className="shrink-0" />
+            {!isCollapsed && <span className="text-sm font-semibold tracking-tight">New Chat</span>}
+          </button>
+        </div>
+      )}
+
+      {/* Search Bar - Only for logged in users */}
+      {user && !isCollapsed && (
+        <div className="px-4 mb-4">
+          <div className="relative group/search">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/search:text-slate-900 dark:group-focus-within/search:text-white transition-colors" />
+            <input
+              type="text"
+              placeholder="Search chats..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5 focus:border-slate-300 dark:focus:border-white/20 rounded-xl py-2 pl-9 pr-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-500 outline-none transition-all"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* History List - Only for logged in users */}
+      {user && (
+        <div className="flex-1 px-4 py-2 space-y-1 overflow-y-auto no-scrollbar">
+          {!isCollapsed && (
+            <div className="flex items-center justify-between px-2 mb-2">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] opacity-60">History</span>
+              <History size={12} className="text-slate-400 dark:text-slate-500" />
             </div>
-         ) : (
-            <Link to="/login" className="btn-primary w-full text-sm">
-               Sign In
-            </Link>
-         )}
+          )}
+
+          <div className="space-y-0.5">
+            {filteredChats.length === 0 ? (
+              <div className={`px-3 py-4 text-center ${isCollapsed ? 'hidden' : ''}`}>
+                <p className="text-[11px] font-medium italic text-slate-400 dark:text-slate-500/60">
+                  {searchQuery ? "No matching chats" : "No recent chats"}
+                </p>
+              </div>
+            ) : (
+              filteredChats.map(chat => (
+                <div key={chat.id} className="relative group px-2">
+                  <button
+                    onClick={() => onSelectChat && onSelectChat(chat.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-300 relative overflow-hidden group/item ${
+                      activeChatId === chat.id 
+                        ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm' 
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'
+                    } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                  >
+                    <MessageSquare 
+                      size={isCollapsed ? 20 : 16} 
+                      className={`shrink-0 transition-transform duration-300 group-hover/item:scale-110 ${activeChatId === chat.id ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`} 
+                    />
+                    {!isCollapsed && (
+                      <span className="truncate text-left font-medium flex-1 pr-6 tracking-tight">
+                        {chat.title || 'Untitled Chat'}
+                      </span>
+                    )}
+                    
+                    {/* Active Indicator Dot */}
+                    {activeChatId === chat.id && !isCollapsed && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3 bg-slate-900 dark:bg-white rounded-r-full" />
+                    )}
+                  </button>
+                  
+                  {!isCollapsed && (
+                    <button
+                      onClick={(e) => onDeleteChat && onDeleteChat(e, chat.id)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all duration-300 transform-gpu hover:scale-110 z-10"
+                      title="Delete Chat"
+                    >
+                      <Trash2 size={13} strokeWidth={2.5} />
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {!user && (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-white/5 flex items-center justify-center text-slate-300 dark:text-slate-600 mb-4 border border-slate-200 dark:border-white/5">
+            <History size={24} />
+          </div>
+          <p className="text-xs font-medium text-slate-400 dark:text-slate-500 px-4">Login to save and keep track of your chat history.</p>
+        </div>
+      )}
+
+      {/* Bottom Profile Section */}
+      <div className="mt-auto p-4 border-t border-slate-200 dark:border-white/5">
+        <div className="space-y-2">
+          {user ? (
+            !isCollapsed ? (
+              <div className="flex items-center gap-3 p-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all group overflow-hidden border border-transparent hover:border-slate-200 dark:hover:border-white/10">
+                <Link to="/profile" className="flex items-center gap-3 shrink-0 overflow-hidden">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 text-slate-900 dark:text-white flex items-center justify-center font-bold border border-slate-200 dark:border-white/10 shrink-0 shadow-sm">
+                    {user?.avatar_url ? <img src={user.avatar_url} alt="A" className="w-full h-full rounded-xl object-cover" /> : user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="overflow-hidden text-nowrap">
+                    <div className="text-xs font-semibold text-slate-900 dark:text-white truncate max-w-25">{user?.name}</div>
+                    <div className="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-500 opacity-60">Pro Account</div>
+                  </div>
+                </Link>
+                <button 
+                  onClick={() => navigate('/settings')}
+                  className="ml-auto p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl transition-all"
+                >
+                  <Settings size={16} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-4 py-2">
+                <Link to="/profile" className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 overflow-hidden shrink-0">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </Link>
+              </div>
+            )
+          ) : (
+            <button 
+              onClick={() => navigate('/login')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 hover:opacity-90 active:scale-95 transition-all font-bold text-sm ${isCollapsed ? 'justify-center px-0' : ''}`}
+            >
+              <LogOut size={16} className={isCollapsed ? '' : 'rotate-180'} />
+              {!isCollapsed && <span>Sign In</span>}
+            </button>
+          )}
+        </div>
       </div>
     </aside>
   );

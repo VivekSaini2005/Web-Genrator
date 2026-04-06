@@ -1,47 +1,43 @@
 import React from 'react';
+import { Zap, Layout, Palette, Sparkles } from 'lucide-react';
 
 const EmptyState = ({ setPrompt }) => {
   const suggestions = [
-    "A modern landing page for a coffee shop",
-    "A sleek dashboard with charts and tables",
-    "A responsive pricing component with cards",
-    "A glassmorphism login form"
+    { text: "A modern food delivery landing page with high-quality images", icon: <Layout size={18} /> },
+    { text: "A sleek fintech dashboard with dark mode and glassmorphism", icon: <Palette size={18} /> },
+    { text: "A colorful travel booking platform with card layouts", icon: <Sparkles size={18} /> },
+    { text: "A minimal personal portfolio for a creative developer", icon: <Zap size={18} /> }
   ];
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-fadeIn max-w-4xl mx-auto w-full">
-      <div className="mb-8 w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/5 border border-primary/20">
-        <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-        </svg>
+    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-2xl mx-auto w-full animate-in fade-in zoom-in-95 duration-700">
+      <div className="mb-8 w-14 h-14 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-2xl border border-white/10 hover:scale-110 transition-transform duration-500">
+        <Sparkles size={28} strokeWidth={2.5} />
       </div>
-      
-      <h1 className="text-3xl font-semibold text-text-primary tracking-tight mb-4">
-        What will you <span className="text-primary italic">generate</span> today?
+
+      <h1 className="text-3xl md:text-3xl font-bold text-white tracking-tight mb-4">
+        What should I build today?
       </h1>
-      
-      <p className="text-text-secondary text-sm max-w-lg mb-12 opacity-80 leading-relaxed">
-        Describe any interface, component, or entire page in plain English, and our AI will build the code for you in real-time.
+
+      <p className="text-slate-400 text-[15px] max-w-md mb-12 font-medium leading-relaxed">
+        Describe your dream website or UI component. LinearGen transforms your ideas into pixel-perfect production code.
       </p>
-      
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {suggestions.map((suggestion, i) => (
-          <button 
-            key={i} 
-            onClick={() => setPrompt(suggestion)} 
-            className="group p-5 rounded-2xl bg-surface/50 border border-border/50 text-left flex items-start gap-4 cursor-pointer hover:bg-surface/80 hover:border-primary/30 transition-all duration-200 active:scale-[0.99]"
+
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
+        {suggestions.map((item, i) => (
+          <button
+            key={i}
+            onClick={() => setPrompt(item.text)}
+            className="group p-4 rounded-2xl bg-white/5 border border-white/5 text-left flex items-start gap-4 hover:bg-white/10 hover:border-white/10 transition-all duration-300 active:scale-[0.98]"
           >
-            <div className="shrink-0 w-8 h-8 rounded-lg bg-bg flex items-center justify-center text-sm border border-border/50 group-hover:scale-110 transition-transform">
-              💡
+            <div className="shrink-0 w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-slate-400 border border-white/5 group-hover:scale-110 group-hover:text-white transition-all duration-500">
+              {item.icon}
             </div>
             <div className="flex-1 min-w-0">
-               <p className="text-sm font-medium text-text-secondary group-hover:text-text-primary transition-colors leading-snug">
-                 {suggestion}
+               <p className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors leading-relaxed line-clamp-2">
+                 {item.text}
                </p>
             </div>
-            <svg className="w-4 h-4 text-text-secondary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"></path>
-            </svg>
           </button>
         ))}
       </div>

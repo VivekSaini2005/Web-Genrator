@@ -1,61 +1,65 @@
 import React from 'react';
+import { User, Sparkles, MoreHorizontal } from 'lucide-react';
 
-const ChatHistory = ({ messages }) => {
-  if (!messages || messages.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center mt-20 text-center animate-fadeIn px-6">
-        <div className="w-12 h-12 rounded-2xl bg-surface border border-border/50 flex items-center justify-center mb-4 shadow-sm opacity-50">
-           <svg className="w-6 h-6 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-        </div>
-        <p className="text-sm font-medium text-text-secondary opacity-60 tracking-tight">
-          Start building your website with AI
-        </p>
-      </div>
-    );
-  }
+const ChatHistory = ({ messages, loading }) => {
+  if (!messages || messages.length === 0) return null;
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full max-w-3xl mx-auto flex flex-col gap-10 pb-40 transition-all duration-500">
       {messages.map((msg, idx) => {
         const isUser = msg.role === 'user';
         const isError = msg.role === 'error';
-        
-        return (
-          <div 
-            key={idx} 
-            className={`flex flex-col w-full animate-fadeIn transition-all duration-300 ${isUser ? 'items-end' : 'items-start'}`}
-          >
-            {/* Small Role Indicator */}
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary mb-2 px-2 opacity-30">
-               {isUser ? 'You' : 'LinearGen'}
-            </span>
+        const key = msg.id || `msg-${idx}`;
 
-            {/* Message Bubble */}
-            <div 
-              className={`px-5 py-3.5 rounded-2xl border transition-all duration-300 selection:bg-white/20 leading-relaxed group ${
-                isUser 
-                  ? 'bg-primary text-white border-primary/20 shadow-lg shadow-primary/5 self-end max-w-[85%] sm:max-w-[75%]' 
-                  : isError
-                  ? 'bg-red-400/10 border-red-400/20 text-red-300 max-w-full italic text-sm'
-                  : 'bg-surface border-border/50 text-text-primary self-start max-w-[85%] sm:max-w-[75%] shadow-sm hover:shadow-md hover:border-border transition-all cursor-default'
-              }`}
-            >
-              <div 
-                className={`text-sm tracking-tight whitespace-pre-wrap font-normal ${
-                  isUser ? 'text-white' : 'text-text-primary'
-                }`}
-              >
-                {msg.content}
-              </div>
-              
-              {/* Dynamic pulse for the latest AI message */}
-              {!isUser && !isError && idx === messages.length - 1 && (
-                <span className="inline-block w-1 h-3.5 ml-1 bg-primary/40 animate-pulse rounded-full align-middle"></span>
-              )}
+        return (
+          <div
+            key={key}
+            className={`flex w-full animate-in fade-in slide-in-from-bottom-2 duration-500 group ${isUser ? 'justify-end' : 'justify-start'}`}
+          >
+            <div className={`flex gap-5 max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+               {!isUser && (
+                 <div className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center bg-white text-slate-950 shadow-xl self-start border border-white/10">
+                    <Sparkles size={16} strokeWidth={2.5} />        
+                 </div>
+               )}
+
+               <div className={`flex flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`}>
+                  <div className={`px-5 py-3.5 rounded-3xl text-[15px] leading-relaxed tracking-tight whitespace-pre-wrap transition-all shadow-sm ${     
+                    isUser
+                      ? 'bg-slate-900 border border-white/5 text-slate-100 rounded-tr-md'
+                      : isError
+                      ? 'bg-red-500/10 border border-red-500/20 text-red-500 italic'
+                      : 'text-slate-200'   
+                  }`}>
+                    {msg.content}
+                  </div>
+                  
+                  {/* Action Bar (ChatGPT Style) */}
+                  {!isUser && !isError && (
+                    <div className="flex items-center gap-3 px-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <button className="text-slate-500 hover:text-white transition-colors"><MoreHorizontal size={14} /></button>
+                    </div>
+                  )}
+               </div>
             </div>
           </div>
         );
       })}
+
+      {loading && (
+        <div className="flex justify-start animate-in fade-in duration-300">
+          <div className="flex gap-5 items-start">
+            <div className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center bg-white text-slate-950 shadow-xl border border-white/10">
+               <Sparkles size={16} strokeWidth={2.5} className="animate-pulse" />
+            </div>
+            <div className="pt-3 flex gap-1.5">
+               <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+               <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+               <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

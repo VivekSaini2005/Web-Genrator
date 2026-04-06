@@ -1,8 +1,9 @@
-@import "tailwindcss";
 
-@theme {
-  --color-primary: #625df5;
+@reference "../index.css";
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-white to-white/60;
+    opacity: 0.03;
+  }
 }
-
-/* Ensure the selector dark mode works properly */
-@custom-variant dark (&:is(.dark *));

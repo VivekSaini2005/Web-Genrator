@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from 'react';
+import { ArrowUp, Plus, Paperclip, MoreHorizontal } from 'lucide-react';
 
 const PromptBar = ({ prompt, setPrompt, loading, generateCode }) => {
   const textareaRef = useRef(null);
 
-  // Auto-resize textarea based on content for a premium feel
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -21,36 +21,61 @@ const PromptBar = ({ prompt, setPrompt, loading, generateCode }) => {
   };
 
   return (
-    <div className="w-full flex items-end gap-4 p-4 bg-surface/50 backdrop-blur-xl border border-border shadow-2xl rounded-3xl group transition-all duration-300 hover:border-primary/30">
-      <textarea
-        ref={textareaRef}
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Ask LinearGen to build something..."
-        className="flex-1 bg-transparent border-none px-2 py-3 text-sm text-text-primary focus:ring-0 outline-none resize-none max-h-[200px] overflow-y-auto transition-all duration-200 placeholder:text-text-secondary/40 leading-relaxed"
-        rows={1}
-        disabled={loading}
-      />
+    <div className="w-full max-w-3xl mx-auto px-4 group">
+      <div className="relative flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl dark:shadow-none rounded-3xl transition-all duration-500 hover:shadow-primary/5 dark:hover:border-white/20 focus-within:border-slate-300 dark:focus-within:border-white/20 focus-within:shadow-xl dark:focus-within:shadow-white/5">
+        
+        {/* Input Area */}
+        <div className="flex items-end gap-2 px-4 py-3">
+          <button className="p-2 text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 shrink-0 mb-0.5 active:scale-90">
+            <Plus size={20} strokeWidth={2.5} />
+          </button>
+
+          <textarea
+            ref={textareaRef}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask anything..."
+            className="flex-1 bg-transparent border-none py-2 text-[15px] text-slate-900 dark:text-white focus:ring-0 outline-none resize-none max-h-[200px] overflow-y-auto placeholder:text-slate-400 dark:placeholder:text-slate-500 leading-relaxed font-medium transition-premium"
+            rows={1}
+            disabled={loading}
+          />
+
+          <button
+            onClick={generateCode}
+            disabled={loading || !prompt.trim()}
+            className={`p-2 rounded-xl transition-all shrink-0 flex items-center justify-center mb-0.5 transform-gpu ${
+              prompt.trim() 
+                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 hover:scale-110 active:scale-90 shadow-lg shadow-black/20 dark:shadow-white/10 rotate-0 hover:rotate-3' 
+                : 'text-slate-400 dark:text-slate-600 bg-slate-100 dark:bg-white/5 cursor-not-allowed opacity-50'
+            }`}
+          >
+            {loading ? (
+              <div className={`animate-spin h-5 w-5 border-2 rounded-full ${prompt.trim() ? 'border-white dark:border-slate-950 border-t-transparent' : 'border-slate-400 dark:border-slate-600 border-t-transparent'}`} />
+            ) : (
+              <ArrowUp size={20} strokeWidth={3} />   
+            )}
+          </button>
+        </div>
+
+        {/* Dynamic Footer Info (ChatGPT style) */}
+        {/* {!prompt.trim() && !loading && (
+          <div className="flex items-center gap-4 px-6 pb-3 overflow-x-auto no-scrollbar opacity-60 animate-in fade-in slide-in-from-bottom-2 duration-700">
+             <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all shrink-0 hover:scale-105 active:scale-95 shadow-sm">
+               <Paperclip size={12} /> Search
+             </button>
+             <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all shrink-0 hover:scale-105 active:scale-95 shadow-sm">
+               <MoreHorizontal size={12} /> Reason 
+             </button>
+          </div>
+        )} */}
+      </div>
       
-      <button
-        onClick={generateCode}
-        disabled={loading || !prompt.trim()}
-        className="w-12 h-12 bg-primary hover:bg-indigo-500 text-white rounded-2xl transition-all duration-200 flex-shrink-0 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-primary/20 active:scale-90"
-      >
-        {loading ? (
-          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-        ) : (
-          <svg className="w-5 h-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-          </svg>
-        )}
-      </button>
+      <p className="text-[10px] text-center text-slate-400 dark:text-slate-600 mt-3 font-medium tracking-tight opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+        LinearGen can make mistakes. Check important info.
+      </p>
     </div>
   );
 };
 
-export default PromptBar;
+export default PromptBar;
