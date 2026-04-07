@@ -35,12 +35,40 @@ const PlanViewer = ({ plan }) => {
   );
 };
 
+const FormattedText = ({ text }) => {
+  if (!text) return null;
+  return (
+    <div className="text-[15px] leading-[1.6] text-[var(--text-primary)] mb-4 whitespace-normal space-y-3">
+      {text.split('\n').map((line, i) => {
+        if (!line.trim()) return null;
+        
+        let contentClass = "m-0 leading-relaxed";
+        if (line.trim().startsWith('*')) {
+          contentClass += " ml-6 list-item";
+        } else if (/^\d+\./.test(line.trim())) {
+          contentClass += " mt-4 mb-2 font-medium";
+        }
+
+        const formattedLine = line.split(/(\*\*.*?\*\*|`.*?`)/g).map((part, j) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={j} className="text-[var(--text-primary)] font-semibold">{part.slice(2, -2)}</strong>;
+          } else if (part.startsWith('`') && part.endsWith('`')) {
+            return <code key={j} className="bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded-md text-[13px] border border-[var(--border-color)] text-indigo-500 font-mono">{part.slice(1, -1)}</code>;
+          }
+          return part;
+        });
+        return <div key={i} className={contentClass} style={{ display: line.trim().startsWith('*') ? 'list-item' : 'block' }}>{formattedLine}</div>;
+      })}
+    </div>
+  );
+};
+
 const renderMessageContent = (msg, isUser, isError) => {
   if (isUser || isError) {
     return (
-      <div className={`px-5 py-3.5 rounded-3xl text-[15px] leading-relaxed tracking-tight whitespace-pre-wrap transition-all shadow-sm ${
+      <div className={`px-5 py-3 rounded-[20px] text-[15px] leading-[1.6] whitespace-pre-wrap transition-colors break-words max-w-[85%] animate-in fade-in slide-in-from-bottom-2 duration-300 ${
         isUser
-          ? 'bg-gray-100 text-gray-900 border border-gray-200 shadow-sm dark:bg-white/10 dark:text-white dark:border-white/10 dark:shadow-none rounded-tr-md'
+          ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-tr-[4px]'
           : 'bg-red-500/10 border-red-500/20 text-red-500 italic'
       }`}>
         {msg.content}
@@ -51,22 +79,50 @@ const renderMessageContent = (msg, isUser, isError) => {
   // Attempt to parse AI JSON block to format nicely
   try {
     let codeToParse = msg.content;
+    let prefixedText = "";
+    
     if (typeof codeToParse === 'string') {
-      const sIdx = codeToParse.indexOf('{');
-      const eIdx = codeToParse.lastIndexOf('}');
-      if (sIdx !== -1 && eIdx !== -1 && eIdx > sIdx) {
-        codeToParse = codeToParse.substring(sIdx, eIdx + 1);
+      // First try to extract by markdown json block
+      const jsonMatch = codeToParse.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+      
+      if (jsonMatch && jsonMatch[1]) {
+        codeToParse = jsonMatch[1];
+        prefixedText = msg.content.substring(0, jsonMatch.index).trim();
+      } else {
+        const sIdx = codeToParse.indexOf('{');
+        const eIdx = codeToParse.lastIndexOf('}');
+        if (sIdx !== -1 && eIdx !== -1 && eIdx > sIdx) {
+          prefixedText = codeToParse.substring(0, sIdx).trim();
+          codeToParse = codeToParse.substring(sIdx, eIdx + 1);
+        }
       }
     }
-    const parsed = JSON.parse(codeToParse);
+    
+    let parsed = null;
+    try {
+      parsed = JSON.parse(codeToParse);
+    } catch (e1) {
+      // 1. Fix unescaped backslashes (e.g. \ followed by spaces inside strings)
+      let cleanEscapes = codeToParse.replace(/\\([^"\\\/bfnrtu])/g, '\\\\$1');
+      // 2. Remove trailing commas
+      cleanEscapes = cleanEscapes.replace(/,\s*([\]}])/g, '$1');
+      parsed = JSON.parse(cleanEscapes);
+    }
     if (parsed && typeof parsed === 'object' && (parsed.title || parsed.plan)) {
       return (
-        <div className="flex flex-col gap-4 px-6 py-5 rounded-3xl rounded-tl-md bg-white text-gray-900 border border-gray-200 shadow-sm dark:bg-slate-800 dark:text-white dark:border-white/10 dark:shadow-none w-full max-w-[600px]">
-          {/* Header */}
+        <div className="flex flex-col w-full max-w-[700px] animate-in fade-in slide-in-from-bottom-2 duration-300">
+          {prefixedText && (
+             <div className="mb-2 px-2">
+               <FormattedText text={prefixedText} />
+             </div>
+          )}
+          
+          <div className="flex flex-col gap-4 px-6 py-5 rounded-[20px] rounded-tl-[4px] bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm">
+            {/* Header */}
           {(parsed.title || parsed.description) && (
-            <div className="pb-3 border-b border-gray-100 dark:border-white/5 whitespace-normal">
-              {parsed.title && <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-400 leading-snug">{parsed.title}</h3>}
-              {parsed.description && <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">{parsed.description}</p>}
+            <div className="pb-3 border-b border-[var(--border-color)] whitespace-normal">
+              {parsed.title && <h3 className="text-lg font-semibold text-[var(--text-primary)] leading-snug">{parsed.title}</h3>}
+              {parsed.description && <p className="text-[14px] text-[var(--text-secondary)] mt-1.5 leading-relaxed">{parsed.description}</p>}
             </div>
           )}
 
@@ -75,14 +131,14 @@ const renderMessageContent = (msg, isUser, isError) => {
 
           {/* Improvements Section */}
           {parsed.improvements && Array.isArray(parsed.improvements) && parsed.improvements.length > 0 && (
-            <div className="whitespace-normal">
-              <h4 className="font-semibold mb-3 flex items-center gap-2 text-[15px] pt-2">
+            <div className="whitespace-normal mt-2">
+              <h4 className="font-medium mb-3 flex items-center gap-2 text-[14px] text-[var(--text-primary)]">
                 <Lightbulb size={16} className="text-amber-500" />
                 Future Improvements
               </h4>
-              <ul className="list-disc pl-5 text-[14px] text-slate-600 dark:text-slate-300 space-y-1.5 marker:text-slate-400">
+              <ul className="list-disc pl-5 text-[14px] text-[var(--text-secondary)] space-y-1.5 marker:text-[var(--text-secondary)]">
                 {parsed.improvements.map((imp, i) => (
-                  <li key={i}>{imp}</li>
+                  <li key={i} className="leading-relaxed">{imp}</li>
                 ))}
               </ul>
             </div>
@@ -90,31 +146,41 @@ const renderMessageContent = (msg, isUser, isError) => {
 
           {/* Files Generated Area */}
           {parsed.files && Object.keys(parsed.files).length > 0 && (
-            <div className="pt-4 mt-2 border-t border-gray-100 dark:border-white/5 whitespace-normal">
-               <h4 className="font-semibold mb-3 flex items-center gap-2 text-[15px]">
-                 <FileCode2 size={16} className="text-emerald-500" />
+            <div className="pt-4 mt-2 border-t border-[var(--border-color)] whitespace-normal">
+               <h4 className="font-medium mb-3 flex items-center gap-2 text-[14px] text-[var(--text-primary)]">
+                 <FileCode2 size={16} className="text-[var(--accent)]" />
                  Files Generated
                </h4>
                <div className="flex flex-wrap gap-2">
                   {Object.keys(parsed.files).map(file => (
-                    <span key={file} className="px-3 py-1.5 text-xs font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
+                    <span key={file} className="px-2.5 py-1 text-xs font-medium bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-md border border-[var(--border-color)]">
                       {file}
                     </span>
                   ))}
                </div>
             </div>
           )}
+          </div>
         </div>
       );
     }
   } catch (e) {
-    // Legacy / Raw text fallback
+    // If it STILL fails, just render the conversational text nicely instead of huge text block
+    return (
+       <div className="flex flex-col w-full max-w-[700px] animate-in fade-in slide-in-from-bottom-2 duration-300">
+         <div className="px-6 py-5 rounded-[20px] rounded-tl-[4px] bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm">
+            <FormattedText text={msg.content} />
+         </div>
+       </div>
+    );
   }
 
-  // Fallback if parsing fails or object lacks expected shape
+  // Fallback if parsing fails structurally
   return (
-    <div className="px-5 py-3.5 rounded-3xl text-[15px] leading-relaxed tracking-tight whitespace-pre-wrap transition-all shadow-sm bg-white text-gray-900 border border-gray-200 dark:bg-slate-800 dark:text-white dark:border-white/10 dark:shadow-none rounded-tl-md">
-      {msg.content}
+    <div className="flex flex-col w-full max-w-[700px] animate-in fade-in slide-in-from-bottom-2 duration-300">
+       <div className="px-6 py-5 rounded-[20px] rounded-tl-[4px] bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm">
+          <FormattedText text={msg.content} />
+       </div>
     </div>
   );
 };
@@ -132,7 +198,7 @@ const ChatHistory = () => {
   if (!messages || messages.length === 0) return null;
 
   return (
-    <div className="w-full flex w-full flex-col gap-10 pb-20 transition-all duration-500">
+    <div className="w-full flex w-full flex-col gap-6 pb-20 transition-all duration-500">
       {messages.map((msg, idx) => {
         const isUser = msg.role === 'user';
         const isError = msg.role === 'error';
@@ -141,22 +207,22 @@ const ChatHistory = () => {
         return (
           <div
             key={key}
-            className={`flex w-full animate-in fade-in slide-in-from-bottom-2 duration-500 group ${isUser ? 'justify-end' : 'justify-start'}`}
+            className={`flex w-full animate-in fade-in slide-in-from-bottom-2 duration-300 group ${isUser ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`flex gap-5 max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex gap-4 w-full ${isUser ? 'justify-end' : 'max-w-[100%] flex-row'}`}>
                {!isUser && (
-                 <div className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center bg-white text-slate-950 shadow-xl self-start border border-white/10">
-                    <Sparkles size={16} strokeWidth={2.5} />        
+                 <div className="w-[30px] h-[30px] rounded-md shrink-0 flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm self-start border border-[var(--border-color)]">
+                    <Sparkles size={14} strokeWidth={2.5} />        
                  </div>
                )}
 
-               <div className={`flex flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`}>
+               <div className={`flex flex-col gap-1.5 w-full ${isUser ? 'items-end' : 'items-start'}`}>
                   {renderMessageContent(msg, isUser, isError)}
 
                   {/* Action Bar (ChatGPT Style) */}
                   {!isUser && !isError && (
-                    <div className="flex items-center gap-3 px-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <button className="text-slate-500 hover:text-white transition-colors"><MoreHorizontal size={14} /></button>
+                    <div className="flex items-center gap-2 px-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <button className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1 rounded-md hover:bg-[var(--bg-secondary)]"><MoreHorizontal size={14} /></button>
                     </div>
                   )}
                </div>
@@ -166,15 +232,15 @@ const ChatHistory = () => {
       })}
 
       {isGenerating && (
-        <div className="flex justify-start animate-in fade-in duration-300">
-          <div className="flex gap-5 items-start">
-            <div className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center bg-white text-slate-950 shadow-xl border border-white/10">
-               <Sparkles size={16} strokeWidth={2.5} className="animate-pulse" />
+        <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="flex gap-4 items-start w-full">
+            <div className="w-[30px] h-[30px] rounded-md shrink-0 flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm border border-[var(--border-color)]">
+               <Sparkles size={14} strokeWidth={2.5} className="animate-pulse" />
             </div>
-            <div className="pt-3 flex gap-1.5">
-               <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-               <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-               <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+            <div className="pt-3 flex gap-1.5 px-5 py-3.5 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-[20px] rounded-tl-[4px] shadow-sm max-w-[100px] h-[46px] items-center justify-center">
+               <div className="w-1.5 h-1.5 bg-[var(--text-secondary)] rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+               <div className="w-1.5 h-1.5 bg-[var(--text-secondary)] rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+               <div className="w-1.5 h-1.5 bg-[var(--text-secondary)] rounded-full animate-bounce"></div>
             </div>
           </div>
         </div>

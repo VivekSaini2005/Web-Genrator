@@ -52,28 +52,28 @@ const Navbar = ({ showOptions, activeTab, setActiveTab, onEnhanceUI, isGeneratin
   };
 
   return (
-    <nav className="h-16 w-full bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 flex items-center justify-between sticky top-0 z-30 shrink-0 transition-colors duration-300">
+    <nav className="h-14 w-full bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border-color)] px-5 flex items-center justify-between sticky top-0 z-30 shrink-0 transition-colors duration-300">
 
       {/* Left: Page Title */}
-      <div className="flex items-center gap-4">
-        <div className="h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_12px_rgba(99,102,241,0.8)]" />
-        <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+      <div className="flex items-center gap-3">
+        <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+        <h2 className="text-[13px] font-medium text-[var(--text-secondary)]">
           {getPageTitle()}
         </h2>
       </div>
 
       {/* Center: Tabs if options shown */}
       {showOptions && (
-        <div className="absolute left-1/2 -translate-x-1/2 flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white transition-colors duration-300">
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-[var(--bg-secondary)] p-0.5 rounded-md border border-[var(--border-color)] text-[var(--text-primary)] transition-colors duration-300">
           <button 
             onClick={() => setActiveTab("code")}
-            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'code' ? 'bg-white dark:bg-white text-slate-950 dark:text-slate-950 shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+            className={`px-3 py-1 text-[11px] font-medium rounded-sm transition-colors ${activeTab === 'code' ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
           >
             Code
           </button>
           <button 
             onClick={() => setActiveTab("preview")}
-            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'preview' ? 'bg-white dark:bg-white text-slate-950 dark:text-slate-950 shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+            className={`px-3 py-1 text-[11px] font-medium rounded-sm transition-colors ${activeTab === 'preview' ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
           >
             Preview
           </button>
@@ -81,35 +81,35 @@ const Navbar = ({ showOptions, activeTab, setActiveTab, onEnhanceUI, isGeneratin
       )}
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         {showOptions && onEnhanceUI && (
           <button 
             onClick={onEnhanceUI} 
             disabled={isGenerating}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--accent)] hover:bg-blue-600 text-white rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Sparkles size={14} className={isGenerating ? "animate-pulse" : ""} />
+            <Sparkles size={13} className={isGenerating ? "animate-pulse" : ""} />
             {isGenerating ? "Enhancing..." : "Enhance UI"}
           </button>
         )}
       {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-300"
+          className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors"
           title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
-          {isDark ? <Moon size={18} /> : <Sun size={18} />}
+          {isDark ? <Moon size={15} /> : <Sun size={15} />}
         </button>
 
         {/* User Section */}
         {user ? (
           <>
-            <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />
+            <div className="w-px h-3.5 bg-[var(--border-color)] mx-1" />
             <Link
               to="/profile"
-              className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-all group"
+              className="flex items-center p-0.5 rounded-full hover:bg-[var(--bg-secondary)] transition-colors group"
             >
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-white overflow-hidden shadow-sm group-hover:border-slate-400 dark:group-hover:border-white/20 transition-all">
+              <div className="w-6 h-6 rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center justify-center text-[10px] font-medium text-[var(--text-primary)] overflow-hidden">
                 {user.avatar_url ? (
                   <img src={user.avatar_url} alt="User" className="w-full h-full object-cover" />
                 ) : (
@@ -119,16 +119,16 @@ const Navbar = ({ showOptions, activeTab, setActiveTab, onEnhanceUI, isGeneratin
             </Link>
             <button
               onClick={handleLogout}
-              className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all duration-200"
+              className="p-1.5 text-[var(--text-secondary)] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors"
               title="Sign Out"
             >
-              <LogOut size={16} />
+              <LogOut size={15} />
             </button>
           </>
         ) : (
           <Link
             to="/login"
-            className="px-4 py-1.5 text-xs font-semibold bg-slate-900 dark:bg-white text-white dark:text-slate-950 rounded-xl hover:opacity-90 transition-all shadow-sm"
+            className="px-3 py-1.5 text-xs font-medium bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-md hover:bg-[var(--text-secondary)] transition-colors"
           >
             Sign In
           </Link>

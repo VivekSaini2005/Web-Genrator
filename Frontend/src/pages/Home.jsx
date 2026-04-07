@@ -72,14 +72,37 @@ const Home = () => {
   let parsedCode = { files: { "index.html": code } };
   try {
     let codeToParse = code;
+    let extracted = false;
+    
     if (typeof codeToParse === 'string') {
-      const sIdx = codeToParse.indexOf('{');
-      const eIdx = codeToParse.lastIndexOf('}');
-      if (sIdx !== -1 && eIdx !== -1 && eIdx > sIdx) {
-        codeToParse = codeToParse.substring(sIdx, eIdx + 1);
+      const jsonMatch = codeToParse.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+      if (jsonMatch && jsonMatch[1]) {
+        codeToParse = jsonMatch[1];
+        extracted = true;
+      } else {
+        const sIdx = codeToParse.indexOf('{');
+        const eIdx = codeToParse.lastIndexOf('}');
+        if (sIdx !== -1 && eIdx !== -1 && eIdx > sIdx) {
+          codeToParse = codeToParse.substring(sIdx, eIdx + 1);
+          extracted = true;
+        }
       }
     }
-    const parsed = JSON.parse(codeToParse);
+    
+    // Update fallback if we successfully isolated a potential JSON block
+    if (extracted) {
+      parsedCode = { files: { "index.html": codeToParse } };
+    }
+    
+    let parsed = null;
+    try {
+      parsed = JSON.parse(codeToParse);
+    } catch (e1) {
+      let cleanEscapes = codeToParse.replace(/\\([^"\\\/bfnrtu])/g, '\\\\$1');
+      cleanEscapes = cleanEscapes.replace(/,\s*([\]}])/g, '$1');
+      parsed = JSON.parse(cleanEscapes);
+    }
+
     if (parsed && parsed.files) {
       parsedCode = parsed;
     }
@@ -111,13 +134,13 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="h-screen w-full flex bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 font-sans overflow-hidden transition-all duration-300">
+    <div className="h-screen w-full flex bg-[var(--bg-primary)] font-sans overflow-hidden transition-colors duration-300">
 
       {/* SECTION 1: SIDEBAR (LEFT) */}
       <Sidebar />
 
       {/* SECTION 2: MAIN CONTENT (RIGHT) */}
-      <main className="flex-1 flex flex-col relative min-w-0 transition-all duration-300">
+      <main className="flex-1 flex flex-col relative min-w-0 transition-colors duration-300">
         
         {/* Header / Workspace Navbar */}
         <Navbar 
@@ -127,25 +150,26 @@ const Home = () => {
           onEnhanceUI={handleEnhanceUI}
         />
         {/* Content Area */}
-        <div className="flex-1 flex overflow-hidden relative">
-          {!currentChatId ? (
-            <section className="w-full flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-white">
-              <div className="w-full max-w-4xl px-6 flex flex-col justify-center py-20 text-gray-900 dark:text-white fade-in">
-                 <EmptyState setPrompt={setPromptContent} />
-              </div>
+        <div className="flex-1 overflow-hidden relative flex justify-center">
+          <div className="w-full max-w-[1400px] h-full flex flex-col">
+            {!currentChatId ? (
+              <section className="flex-1 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500">
+                <div className="w-full max-w-3xl px-6 flex flex-col justify-center py-20 fade-in">
+                   <EmptyState setPrompt={setPromptContent} />
+                </div>
 
-               {/* PromptBar - Centered at Bottom for Landing */}
-               <div className="absolute bottom-10 left-0 w-full px-6 z-20 pointer-events-none transition-colors duration-300">
-                  <div className="w-full max-w-3xl mx-auto pointer-events-auto hover:-translate-y-1 transition-transform duration-500">
-                     <PromptBar content={promptContent} setContent={setPromptContent} onSubmit={handleInitialSubmit} />
-                  </div>
-               </div>
-            </section>
-          ) : (
-            <div className="w-full h-full flex animate-in fade-in zoom-in-95 duration-500">
-              {/* LEFT PANE: Chat */}
-                <section className="w-[40%] flex flex-col border-r border-gray-200 dark:border-white/10 relative overflow-hidden bg-white shadow-sm text-gray-900 dark:bg-slate-950 dark:text-white transition-colors duration-300">
-                <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar pt-6 pb-32">
+                 {/* PromptBar - Centered at Bottom for Landing */}
+                 <div className="absolute bottom-8 left-0 w-full px-6 z-20 pointer-events-none transition-colors duration-300">
+                    <div className="w-full max-w-2xl mx-auto pointer-events-auto hover:-translate-y-1 transition-transform duration-500 shadow-lg rounded-xl">
+                       <PromptBar content={promptContent} setContent={setPromptContent} onSubmit={handleInitialSubmit} />
+                    </div>
+                 </div>
+              </section>
+            ) : (
+              <div className="flex-1 flex animate-in fade-in zoom-in-95 duration-500 border-x border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm my-4 rounded-xl overflow-hidden min-h-0 mx-4">
+                {/* LEFT PANE: Chat */}
+                  <section className="w-[40%] flex flex-col border-r border-[var(--border-color)] relative overflow-hidden bg-[var(--bg-secondary)] transition-colors duration-300">
+                  <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar pt-6 pb-32">
                     <div className="w-full px-6 min-h-full flex flex-col">
                         <div className="flex-1 text-slate-900 dark:text-white space-y-6">
                             {messages.length > 0 ? (
@@ -160,18 +184,18 @@ const Home = () => {
                  </div>
 
                  {/* PromptBar - Fixed at Bottom of Left Pane */}
-                 <div className="absolute bottom-0 left-0 w-full px-6 pb-6 pt-12 bg-gradient-to-t from-white via-white/95 dark:from-slate-950 dark:via-slate-950/95 to-transparent z-20 pointer-events-none transition-colors duration-300">
-                    <div className="w-full pointer-events-auto hover:-translate-y-1 transition-transform duration-500">
+                 <div className="absolute bottom-0 left-0 w-full px-6 pb-6 pt-12 bg-gradient-to-t from-[var(--bg-secondary)] via-[var(--bg-secondary)]/95 to-transparent z-20 pointer-events-none transition-colors duration-300">
+                    <div className="w-full pointer-events-auto hover:-translate-y-1 transition-transform duration-500 shadow-[var(--shadow-md)] rounded-xl">
                        <PromptBar content={promptContent} setContent={setPromptContent} />
                     </div>
                  </div>
               </section>
 
               {/* RIGHT PANE: Code / Preview */}
-              <section className="w-[60%] flex flex-col bg-gray-50 dark:bg-slate-950 overflow-hidden transition-colors duration-300">
+              <section className="w-[60%] flex flex-col bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 relative">
                  {activeTab === "code" ? (
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                      <div className="h-full relative bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 shadow-sm rounded-xl overflow-hidden transition-colors duration-300 flex flex-col"><div className="flex items-center gap-1 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-slate-800/50 px-3 py-2 shrink-0">{fileNames.map(fileName => (<button key={fileName} onClick={() => setActiveFileTab(fileName)} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${activeFileTab === fileName ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800"}`}>{fileName}</button>))}</div>{latestAiMessageContent && code !== latestAiMessageContent && (<button onClick={() => setCode(latestAiMessageContent)} className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg shadow-sm border border-slate-200 dark:border-white/10 transition-all active:scale-95 backdrop-blur-sm group" title="Reset to AI Output"><RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" /><span className="text-xs font-medium">Reset Code</span></button>)}<div className="flex-1 w-full pb-2 relative"><MonacoEditor height="100%" language={activeFileTab.endsWith(".css") ? "css" : activeFileTab.endsWith(".js") ? "javascript" : "html"} theme={editorTheme} value={currentFileContent}
+                      <div className="h-full relative bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-[var(--shadow-sm)] rounded-xl overflow-hidden transition-colors duration-300 flex flex-col"><div className="flex items-center gap-1 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2 shrink-0">{fileNames.map(fileName => (<button key={fileName} onClick={() => setActiveFileTab(fileName)} className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${activeFileTab === fileName ? "bg-[var(--bg-primary)] text-[var(--accent)] shadow-sm" : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"}`}>{fileName}</button>))}</div>{latestAiMessageContent && code !== latestAiMessageContent && (<button onClick={() => setCode(latestAiMessageContent)} className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-primary)]/80 hover:bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg shadow-sm border border-[var(--border-color)] transition-all active:scale-95 backdrop-blur-sm group" title="Reset to AI Output"><RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" /><span className="text-xs font-medium">Reset Code</span></button>)}<div className="flex-1 w-full pb-2 relative"><MonacoEditor height="100%" language={activeFileTab.endsWith(".css") ? "css" : activeFileTab.endsWith(".js") ? "javascript" : "html"} theme={editorTheme} value={currentFileContent}
                             onChange={handleCodeChange}
                             options={{
                               minimap: { enabled: false },
@@ -190,7 +214,8 @@ const Home = () => {
                  )}
               </section>
             </div>
-          )}
+            )}
+          </div>
 
         </div>
       </main>
