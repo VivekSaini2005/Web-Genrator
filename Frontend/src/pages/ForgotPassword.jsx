@@ -34,7 +34,7 @@ const ForgotPassword = () => {
         <div className="w-12 h-12 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
           <Zap size={28} fill="currentColor" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">LinearGen</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">WebGen</h1>
       </Link>
 
       {/* Card */}
@@ -99,7 +99,7 @@ const ForgotPassword = () => {
       </div>
 
       <p className="mt-8 text-xs text-slate-400 dark:text-slate-500 font-medium tracking-tight">
-        Protected by LinearGen Secure.
+        Protected by WebGen Secure.
       </p>
     </div>
   );

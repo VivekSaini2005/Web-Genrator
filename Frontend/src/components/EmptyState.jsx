@@ -16,16 +16,33 @@ const EmptyState = ({ setPrompt }) => {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-2xl mx-auto w-full animate-in fade-in zoom-in-95 duration-500">
-      <div className="mb-6 w-12 h-12 rounded-[16px] bg-[var(--bg-secondary)] text-[var(--text-primary)] flex items-center justify-center border border-[var(--border-color)] shadow-sm">
+      {/* <div className="mb-6 w-12 h-12 rounded-[16px] bg-[var(--bg-secondary)] text-[var(--text-primary)] flex items-center justify-center border border-[var(--border-color)] shadow-sm">
         <Sparkles size={24} strokeWidth={2} />
+      </div> */}
+
+      <div className="group mb-6 w-12 h-12 rounded-2xl bg-[var(--bg-secondary)] text-[var(--text-primary)] flex items-center justify-center border border-[var(--border-color)] shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.03] active:scale-[0.97]">
+        <svg 
+          width="22" 
+          height="22" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          className="transition-all duration-200 group-hover:scale-105"
+        >
+          {/* 2x2 grid */}
+          <rect x="4" y="4" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/>
+          <rect x="14" y="4" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/>
+          <rect x="4" y="14" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/>
+          <rect x="14" y="14" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/>
+        </svg>
       </div>
 
       <h1 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight mb-3">
-        {user ? "What can I help you ship?" : "Welcome to LinearGen"}
+        {user ? "What can I help you ship?" : "Welcome to WebGen"}
       </h1>
 
       <p className="text-[var(--text-secondary)] text-[15px] max-w-lg mb-10 leading-relaxed">
-        {user ? "Describe your dream UI component or full page layout. LinearGen transforms your ideas into production-ready code." : "Log in to start generating pixel-perfect React components, building user interfaces, and organizing your conversations."}
+        {user ? "Describe your dream UI component or full page layout. WebGen transforms your ideas into production-ready code." : "Log in to start generating pixel-perfect React components, building user interfaces, and organizing your conversations."}
       </p>
 
       {user ? (

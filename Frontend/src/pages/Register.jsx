@@ -58,7 +58,7 @@ const Register = () => {
           <div className="w-12 h-12 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
             <Zap size={28} fill="currentColor" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">LinearGen</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">WebGen</h1>
         </Link>
 
         {/* Card */}
@@ -66,7 +66,7 @@ const Register = () => {
           
           <div className="mb-8">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Create account</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Join LinearGen to start generating.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Join WebGen to start generating.</p>
           </div>
 
           {error && (

@@ -97,7 +97,7 @@ const PromptBar = ({ content = "", setContent = () => {}, onSubmit }) => {
       </div>
       
       <p className="text-[11px] text-center text-[var(--text-secondary)] mt-3">
-        LinearGen can make mistakes. Consider verifying important information.
+        WebGen can make mistakes. Consider verifying important information.
       </p>
     </div>
   );

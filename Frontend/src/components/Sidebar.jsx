@@ -51,16 +51,45 @@ const Sidebar = () => {
         </div>
       )}
       <div className={`flex items-center gap-3 border-b border-[var(--border-color)] ${isCollapsed ? 'justify-center p-4' : 'px-5 pb-4'}`}>
-        <div 
+        {/* <div 
           onClick={handleCreateNewChat}
           className="w-8 h-8 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] flex items-center justify-center shrink-0 hover:bg-[var(--text-secondary)] transition-colors cursor-pointer shadow-sm"
         >
           <Zap size={16} fill="currentColor" />
+        </div> */}
+        <div 
+          onClick={handleCreateNewChat}
+          className="group w-9 h-9 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] flex items-center justify-center shrink-0 hover:bg-[var(--bg-hover)] transition-all duration-200 cursor-pointer shadow-sm"
+        >
+          <svg 
+            width="18" 
+            height="18" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className="transition-transform duration-200 group-hover:scale-110"
+          >
+            {/* Pencil / Create */}
+            <path 
+              d="M4 20H8L18.5 9.5C19.3284 8.67157 19.3284 7.32843 18.5 6.5C17.6716 5.67157 16.3284 5.67157 15.5 6.5L5 17V20Z" 
+              stroke="currentColor" 
+              strokeWidth="1.6" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
+
+            {/* Minimal sparkle (AI touch) */}
+            <path 
+              d="M14 4L14.5 5.5L16 6L14.5 6.5L14 8L13.5 6.5L12 6L13.5 5.5L14 4Z" 
+              fill="currentColor"
+              className="opacity-80"
+            />
+          </svg>
         </div>
+
         {!isCollapsed && (
           <div className="overflow-hidden fade-in flex items-center gap-2">
-            <span className="text-[14px] font-semibold tracking-tight text-[var(--text-primary)] leading-none">LinearGen</span>
-            <span className="text-[9px] font-medium text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] px-1.5 py-0.5 rounded-md -translate-y-px">v1.0</span>
+            <span className="text-[14px] font-semibold tracking-tight text-[var(--text-primary)] leading-none">WebGen</span>
           </div>
         )}
       </div>

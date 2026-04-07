@@ -211,10 +211,55 @@ const ChatHistory = () => {
           >
             <div className={`flex gap-4 w-full ${isUser ? 'justify-end' : 'max-w-[100%] flex-row'}`}>
                {!isUser && (
-                 <div className="w-[30px] h-[30px] rounded-md shrink-0 flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm self-start border border-[var(--border-color)]">
-                    <Sparkles size={14} strokeWidth={2.5} />        
-                 </div>
+                //  <div className="w-[30px] h-[30px] rounded-md shrink-0 flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm self-start border border-[var(--border-color)]">
+                //     <Sparkles size={14} strokeWidth={2.5} />        
+                //  </div>
+                <div className="group w-[32px] h-[32px] rounded-lg shrink-0 flex items-center justify-center 
+                  bg-[var(--bg-secondary)] text-[var(--text-primary)] 
+                  border border-[var(--border-color)] shadow-sm 
+                  transition-all duration-200 hover:scale-[1.05] active:scale-[0.96]">
+
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="transition-all duration-300"
+                  >
+                    {/* Dynamic outer ring */}
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="7.5"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      className="opacity-40 group-hover:opacity-70"
+                    />
+
+                    {/* Inner square (AI system block) */}
+                    <rect
+                      x="9"
+                      y="9"
+                      width="6"
+                      height="6"
+                      rx="1.5"
+                      fill="currentColor"
+                      className="transition-all duration-300 group-hover:scale-110"
+                    />
+
+                    {/* Subtle top accent line */}
+                    <path
+                      d="M8 6H16"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      className="opacity-60"
+                    />
+                  </svg>
+                </div>
                )}
+
 
                <div className={`flex flex-col gap-1.5 w-full ${isUser ? 'items-end' : 'items-start'}`}>
                   {renderMessageContent(msg, isUser, isError)}
@@ -234,9 +279,55 @@ const ChatHistory = () => {
       {isGenerating && (
         <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="flex gap-4 items-start w-full">
-            <div className="w-[30px] h-[30px] rounded-md shrink-0 flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm border border-[var(--border-color)]">
+            {/* <div className="w-[30px] h-[30px] rounded-md shrink-0 flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm border border-[var(--border-color)]">
                <Sparkles size={14} strokeWidth={2.5} className="animate-pulse" />
+            </div> */}
+
+            <div className="group w-[32px] h-[32px] rounded-lg shrink-0 flex items-center justify-center 
+              bg-[var(--bg-secondary)] text-[var(--text-primary)] 
+              border border-[var(--border-color)] shadow-sm 
+              transition-all duration-200 hover:scale-[1.05] active:scale-[0.96]">
+
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="transition-all duration-300"
+              >
+                {/* Dynamic outer ring */}
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="7.5"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  className="opacity-40 group-hover:opacity-70"
+                />
+
+                {/* Inner square (AI system block) */}
+                <rect
+                  x="9"
+                  y="9"
+                  width="6"
+                  height="6"
+                  rx="1.5"
+                  fill="currentColor"
+                  className="transition-all duration-300 group-hover:scale-110"
+                />
+
+                {/* Subtle top accent line */}
+                <path
+                  d="M8 6H16"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  className="opacity-60"
+                />
+              </svg>
             </div>
+            
             <div className="pt-3 flex gap-1.5 px-5 py-3.5 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-[20px] rounded-tl-[4px] shadow-sm max-w-[100px] h-[46px] items-center justify-center">
                <div className="w-1.5 h-1.5 bg-[var(--text-secondary)] rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                <div className="w-1.5 h-1.5 bg-[var(--text-secondary)] rounded-full animate-bounce [animation-delay:-0.15s]"></div>

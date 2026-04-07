@@ -57,7 +57,7 @@ const Login = () => {
           <div className="w-12 h-12 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center shadow-2xl transition-transform hover:scale-110">
             <Zap size={28} fill="currentColor" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">LinearGen</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">WebGen</h1>
         </div>
 
         {/* Card */}
@@ -160,7 +160,7 @@ const Login = () => {
 
         {/* Dynamic Footer Info */}
         <p className="mt-8 text-xs text-slate-400 dark:text-slate-500 font-medium tracking-tight">
-          © 2026 LinearGen. All rights reserved.
+          © 2026 WebGen. All rights reserved.
         </p>
       </div>
     </GoogleOAuthProvider>
