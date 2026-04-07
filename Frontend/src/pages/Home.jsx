@@ -6,14 +6,37 @@ import ChatHistory from "../components/ChatHistory";
 import EmptyState from "../components/EmptyState";
 import Preview from "../components/Preview";
 import { useChat } from "../context/ChatContext";
+import { RotateCcw } from "lucide-react";
+import MonacoEditor from "@monaco-editor/react";
 
 const Home = () => {
-  const { currentChatId, messages, createNewChat, sendMessage, selectChat } = useChat();
+  const { currentChatId, messages, code, setCode, createNewChat, sendMessage, selectChat } = useChat();
 
   const [activeTab, setActiveTab] = useState("preview");
   const [promptContent, setPromptContent] = useState("");
+  const [editorTheme, setEditorTheme] = useState(() => 
+    document.documentElement.classList.contains("dark") ? "vs-dark" : "light"
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setEditorTheme(document.documentElement.classList.contains("dark") ? "vs-dark" : "light");
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   const hasChatSelected = Boolean(currentChatId);
+
+  const latestAiMessage = messages?.filter((m) => m.role === "ai").slice(-1)[0];
+  const latestAiMessageContent = latestAiMessage?.content;
+  const latestAiMessageId = latestAiMessage?.id;
+
+  useEffect(() => {
+    if (latestAiMessageContent) {
+      setCode(latestAiMessageContent);
+    }
+  }, [latestAiMessageId, latestAiMessageContent, setCode]);
 
   /* eslint-disable react-hooks/set-state-in-effect */
   // Subscribe to navigation events from sidebar "New Chat" click to reset prompt
@@ -38,6 +61,10 @@ const Home = () => {
     await sendMessage(promptText, result.chat.id);
   };
 
+  const handleCodeChange = (value) => {
+    setCode(value || "");
+  };
+
   // Initialize theme on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -52,8 +79,8 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="h-screen w-full flex bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-hidden transition-all duration-300">
-      
+    <div className="h-screen w-full flex bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 font-sans overflow-hidden transition-all duration-300">
+
       {/* SECTION 1: SIDEBAR (LEFT) */}
       <Sidebar />
 
@@ -71,8 +98,8 @@ const Home = () => {
         <div className="flex-1 flex overflow-hidden relative">
           
           {!currentChatId ? (
-            <section className="w-full flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 bg-slate-50 dark:bg-slate-900/50">
-              <div className="w-full max-w-4xl px-6 flex flex-col justify-center py-20 text-slate-900 dark:text-white fade-in">
+            <section className="w-full flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-white">
+              <div className="w-full max-w-4xl px-6 flex flex-col justify-center py-20 text-gray-900 dark:text-white fade-in">
                  <EmptyState setPrompt={setPromptContent} />
               </div>
 
@@ -86,7 +113,7 @@ const Home = () => {
           ) : (
             <div className="w-full h-full flex animate-in fade-in zoom-in-95 duration-500">
               {/* LEFT PANE: Chat */}
-              <section className="w-[40%] flex flex-col border-r border-slate-200 dark:border-white/10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50">
+                <section className="w-[40%] flex flex-col border-r border-gray-200 dark:border-white/10 relative overflow-hidden bg-white shadow-sm text-gray-900 dark:bg-slate-950 dark:text-white transition-colors duration-300">
                 <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar pt-6 pb-32">
                     <div className="w-full px-6 min-h-full flex flex-col">
                         <div className="flex-1 text-slate-900 dark:text-white space-y-6">
@@ -102,7 +129,7 @@ const Home = () => {
                  </div>
 
                  {/* PromptBar - Fixed at Bottom of Left Pane */}
-                 <div className="absolute bottom-0 left-0 w-full px-6 pb-6 pt-12 bg-gradient-to-t from-slate-50 via-slate-50/95 dark:from-slate-900/50 dark:via-slate-900/95 to-transparent z-20 pointer-events-none transition-colors duration-300">
+                 <div className="absolute bottom-0 left-0 w-full px-6 pb-6 pt-12 bg-gradient-to-t from-white via-white/95 dark:from-slate-950 dark:via-slate-950/95 to-transparent z-20 pointer-events-none transition-colors duration-300">
                     <div className="w-full pointer-events-auto hover:-translate-y-1 transition-transform duration-500">
                        <PromptBar content={promptContent} setContent={setPromptContent} />
                     </div>
@@ -110,17 +137,37 @@ const Home = () => {
               </section>
 
               {/* RIGHT PANE: Code / Preview */}
-              <section className="w-[60%] flex flex-col bg-white dark:bg-slate-950 overflow-hidden">
+              <section className="w-[60%] flex flex-col bg-gray-50 dark:bg-slate-950 overflow-hidden transition-colors duration-300">
                  {activeTab === "code" ? (
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                      <div className="h-full bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-white/10">
-                        <textarea
-                          readOnly
-                          value={messages.filter(msg => msg.role !== 'user').pop()?.content || ""}
-                          className="w-full h-full p-6 bg-transparent text-slate-800 dark:text-slate-300 font-mono text-sm resize-none outline-none focus:ring-0 leading-relaxed custom-scrollbar"
-                          placeholder="// Generated code will appear here..."
-                          spellCheck="false"
-                        />
+                      <div className="h-full relative bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 shadow-sm rounded-xl overflow-hidden transition-colors duration-300">   
+                        {latestAiMessageContent && code !== latestAiMessageContent && (
+                          <button
+                            onClick={() => setCode(latestAiMessageContent)}
+                            className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg shadow-sm border border-slate-200 dark:border-white/10 transition-all active:scale-95 backdrop-blur-sm group"
+                            title="Reset to AI Output"
+                          >
+                            <RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" />
+                            <span className="text-xs font-medium">Reset Code</span>
+                          </button>
+                        )}
+                        <div className="w-full h-full pt-14 pb-2">
+                          <MonacoEditor
+                            height="100%"
+                            language="html"
+                            theme={editorTheme}
+                            value={code}
+                            onChange={handleCodeChange}
+                            options={{
+                              minimap: { enabled: false },
+                              fontSize: 14,
+                              wordWrap: "on",
+                              scrollBeyondLastLine: false,
+                              readOnly: false,
+                              padding: { top: 16, bottom: 16 },
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                  ) : (

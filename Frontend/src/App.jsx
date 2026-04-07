@@ -21,7 +21,7 @@ const Placeholder = ({ title }) => (
 function App() {
   return (
     <BrowserRouter>
-      <div className="relative flex min-h-screen w-full bg-slate-950 text-slate-100 font-sans selection:bg-primary/30 selection:text-white overflow-x-hidden">
+      <div className="relative flex min-h-screen w-full bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 font-sans selection:bg-primary/30 selection:text-white overflow-x-hidden">  
         {/* Subtle Background Effect */}
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.05),transparent)] pointer-events-none" />
         <div className="fixed inset-0 bg-premium-noise pointer-events-none" />

@@ -3,7 +3,7 @@ import { useChat } from '../context/ChatContext';
 import { RefreshCw, MonitorPlay } from 'lucide-react';
 
 const Preview = () => {
-  const { messages } = useChat();
+  const { messages, code } = useChat();
   const containerRef = useRef(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -17,11 +17,8 @@ const Preview = () => {
     }
   }, [messages]);
 
-  const latestAiMessage = messages
-    ?.filter((m) => m.role === "ai")
-    .slice(-1)[0];
 
-  if (!messages || messages.length === 0 || !latestAiMessage?.content) {
+  if (!messages || messages.length === 0 || !code) {        
     return (
       <div className="flex-1 flex flex-col w-full h-full bg-slate-100 dark:bg-[#0a0a0a]">
         {/* Header Bar */}
@@ -60,7 +57,7 @@ const Preview = () => {
       <div className="flex-1 p-2 md:p-4 overflow-hidden">
         <iframe
           key={refreshKey}
-          srcDoc={latestAiMessage.content}
+          srcDoc={code}
           className="w-full h-full border-none rounded-xl bg-white shadow-xl ring-1 ring-slate-200/50 dark:ring-white/10"
           title="Website Preview"
           sandbox="allow-scripts allow-same-origin"

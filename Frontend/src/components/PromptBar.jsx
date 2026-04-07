@@ -58,8 +58,8 @@ const PromptBar = ({ content = "", setContent = () => {}, onSubmit }) => {
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 group">
-      <div className="relative flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl dark:shadow-none rounded-3xl transition-all duration-500 hover:shadow-primary/5 dark:hover:border-white/20 focus-within:border-slate-300 dark:focus-within:border-white/20 focus-within:shadow-xl dark:focus-within:shadow-white/5">
-        
+      <div className="relative flex flex-col bg-white text-gray-900 border border-gray-200 shadow-sm dark:bg-slate-800 dark:border-white/10 dark:text-white dark:shadow-none rounded-3xl transition-all duration-500 hover:shadow-primary/5 dark:hover:border-white/20 focus-within:border-slate-300 dark:focus-within:border-white/20 focus-within:shadow-md dark:focus-within:shadow-white/5">
+
         {/* Input Area */}
         <div className="flex items-end gap-2 px-4 py-3">
           <button className="p-2 text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 shrink-0 mb-0.5 active:scale-90">
@@ -72,7 +72,7 @@ const PromptBar = ({ content = "", setContent = () => {}, onSubmit }) => {
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={!user ? "Login to start chatting..." : "What should I build today?"}
-            className="flex-1 bg-transparent border-none py-2 text-[15px] text-slate-900 dark:text-white focus:ring-0 outline-none resize-none max-h-[200px] overflow-y-auto placeholder:text-slate-400 dark:placeholder:text-slate-500 leading-relaxed font-medium transition-premium disabled:opacity-50"
+            className="flex-1 bg-transparent border-none py-2 text-[15px] text-gray-900 placeholder-gray-500 dark:text-white dark:placeholder:text-slate-500 focus:ring-0 outline-none resize-none max-h-[200px] overflow-y-auto leading-relaxed font-medium transition-premium disabled:opacity-50"
             rows={1}
             disabled={!user || isBusy}
           />

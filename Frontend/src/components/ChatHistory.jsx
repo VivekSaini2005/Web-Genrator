@@ -36,14 +36,14 @@ const ChatHistory = () => {
                <div className={`flex flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`}>
                   <div className={`px-5 py-3.5 rounded-3xl text-[15px] leading-relaxed tracking-tight whitespace-pre-wrap transition-all shadow-sm ${     
                     isUser
-                      ? 'bg-slate-900 border border-white/5 text-slate-100 rounded-tr-md'
+                      ? 'bg-gray-100 text-gray-900 border border-gray-200 shadow-sm dark:bg-white/10 dark:text-white dark:border-white/10 dark:shadow-none rounded-tr-md'
                       : isError
-                      ? 'bg-red-500/10 border border-red-500/20 text-red-500 italic'
-                      : 'text-slate-200'   
+                      ? 'bg-red-500/10 border-red-500/20 text-red-500 italic'
+                      : 'bg-white text-gray-900 border border-gray-200 shadow-sm dark:bg-slate-800 dark:text-white dark:border-white/10 dark:shadow-none rounded-tl-md'
                   }`}>
                     {msg.content}
                   </div>
-                  
+
                   {/* Action Bar (ChatGPT Style) */}
                   {!isUser && !isError && (
                     <div className="flex items-center gap-3 px-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">

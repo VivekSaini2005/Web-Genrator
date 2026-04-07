@@ -18,6 +18,7 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [loadingChats, setLoadingChats] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [code, setCode] = useState("");
 
   const activeChatRef = useRef(null);
 
@@ -54,7 +55,7 @@ export const ChatProvider = ({ children }) => {
       setMessages([]); // clear current messages immediately
       
       const data = await apiGetMessages(chatId);
-      
+
       // Update UI only if the user hasn't switched away during the fetch
       if (activeChatRef.current === chatId) {
         setMessages(data);
@@ -71,7 +72,8 @@ export const ChatProvider = ({ children }) => {
     if (currentChat && messages.length === 0) {
       setCurrentChatId(currentChat.id);
       activeChatRef.current = currentChat.id;
-      setMessages([]); 
+      setMessages([]);
+      setCode("");
       return { reused: true, chat: currentChat };
     }
 
@@ -81,6 +83,7 @@ export const ChatProvider = ({ children }) => {
       setCurrentChatId(newChat.id);
       activeChatRef.current = newChat.id;
       setMessages([]); // empty messages for new chat
+      setCode("");
       return { reused: false, chat: newChat };
     } catch (error) {
       console.error("Failed to create chat:", error);
@@ -96,6 +99,7 @@ export const ChatProvider = ({ children }) => {
     setCurrentChatId(null);
     activeChatRef.current = null;
     setMessages([]);
+    setCode("");
   };
 
   // 4. sendMessage(content) - optimistic UI, sends to API, updates messages
@@ -160,6 +164,8 @@ export const ChatProvider = ({ children }) => {
         chats,
         currentChatId,
         messages,
+        code,
+        setCode,
         loadingChats,
         isGenerating,
         loadChats,
@@ -167,6 +173,7 @@ export const ChatProvider = ({ children }) => {
         createNewChat,
         resetChat,
         sendMessage,
+        setMessages,
         deleteChat,
       }}
     >
