@@ -68,35 +68,3 @@ export const verifyToken = (req, res, next) => {
   }
 };
 
-
-// ─────────────────────────────────────────────
-// MIDDLEWARE: optionalAuth  (soft — does not block if missing)
-// ─────────────────────────────────────────────
-/**
- * Silently attaches req.user if a valid token is provided.
- * Does NOT block the request if the token is absent or invalid.
- *
- * Useful for routes that work for both guests and logged-in users,
- * where you want to personalize the response when authenticated.
- *
- * Usage:  router.get("/public", optionalAuth, controller)
- */
-export const optionalAuth = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    req.user = null; // Explicitly mark as unauthenticated
-    return next();
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    // Token is present but invalid — treat as unauthenticated (don't throw)
-    req.user = null;
-  }
-
-  next();
-};

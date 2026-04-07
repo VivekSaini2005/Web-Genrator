@@ -1,14 +1,11 @@
 import express from "express";
 import { generateCode } from "../controllers/generateController.js";
-import { optionalAuth } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // POST /api/generate
-// Public — guests AND logged-in users can generate.
-// optionalAuth attaches req.user if a valid token is present,
-// sets req.user = null for guests. Never blocks the request.
-// Body: { prompt, currentCode? }
-router.post("/generate", optionalAuth, generateCode);
+// Public — guests AND logged-in users can generate code.
+// Body: { prompt, currentCode?, chatId? }
+router.post("/generate", generateCode);
 
 export default router;

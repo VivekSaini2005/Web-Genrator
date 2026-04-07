@@ -5,7 +5,6 @@
 -- Tables:
 --   1. users       → registered accounts (local + Google OAuth)
 --   2. sessions    → refresh tokens for JWT auth
---   3. generations → AI-generated HTML (saved per user or guest)
 -- ============================================================
 
 
@@ -58,30 +57,6 @@ CREATE INDEX idx_sessions_user_id ON sessions (user_id);
 
 -- Makes "validate refresh token" fast
 CREATE INDEX idx_sessions_refresh_token ON sessions (refresh_token);
-
-
--- ============================================================
--- TABLE 3: generations
--- ============================================================
--- Saves every AI-generated website (prompt + HTML output).
--- user_id is NULLABLE:
---   - Logged-in user  → user_id = their UUID
---   - Guest (no login) → user_id = NULL
--- ON DELETE SET NULL = if a user deletes their account,
---   we keep their generations but set user_id to NULL.
--- ============================================================
-
-CREATE TABLE generations (
-  id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id      UUID         REFERENCES users (id) ON DELETE SET NULL,
-  prompt       TEXT         NOT NULL,
-  current_code TEXT,
-  output_code  TEXT         NOT NULL,
-  created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-);
-
--- Makes "fetch all generations for a user" fast
-CREATE INDEX idx_generations_user_id ON generations (user_id);
 
 
 -- ============================================================
