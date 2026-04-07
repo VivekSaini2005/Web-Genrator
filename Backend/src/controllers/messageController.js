@@ -45,6 +45,19 @@ export const sendMessage = async (req, res) => {
       return res.status(404).json({ error: "Chat not found or unauthorized." });
     }
 
+    // Get previous messages to maintain conversation context
+    const previousMessages = await getMessagesByChat(chatId);
+    const history = previousMessages.map((msg) => ({
+      role: msg.role === "ai" ? "model" : "user",
+      parts: [{ text: msg.content }],
+    }));
+
+    // Add the current prompt
+    history.push({
+      role: "user",
+      parts: [{ text: content }],
+    });
+
     // 1. Store USER message
     const userMessage = await createMessage(chatId, "user", content);
 
@@ -54,7 +67,7 @@ export const sendMessage = async (req, res) => {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: content,
+        contents: history,
         config: {
           systemInstruction: systemInstruction,
         },

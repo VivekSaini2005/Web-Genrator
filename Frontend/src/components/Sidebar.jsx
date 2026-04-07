@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   Plus,
   MessageSquare,
@@ -17,16 +17,14 @@ import {
 } from 'lucide-react';
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
-  const { chats, currentChatId, loadChats, selectChat, createNewChat, deleteChat, loadingChats } = useChat();
+  const { user } = useAuth();
+  const { chats, currentChatId, selectChat, resetChat, deleteChat, loadingChats } = useChat();
   const navigate = useNavigate();
-  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+  const handleCreateNewChat = () => {
+    resetChat();
   };
 
   const filteredChats = chats.filter(chat => 
@@ -49,7 +47,7 @@ const Sidebar = () => {
       {/* Header Branding */}
       <div className={`p-6 mb-2 flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''} transition-all duration-500`}>
         <div 
-          onClick={() => navigate('/')}
+          onClick={handleCreateNewChat}
           className="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center shadow-lg shadow-black/5 shrink-0 hover:rotate-12 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer"
         >
           <Zap size={24} fill="currentColor" />
@@ -66,8 +64,9 @@ const Sidebar = () => {
       {user && (
         <div className="px-4 mb-2">
           <button
-            onClick={() => createNewChat()}
-            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-900/5 dark:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 hover:bg-slate-900/10 dark:hover:bg-white/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 group ${isCollapsed ? 'justify-center p-3' : ''}`}
+            onClick={handleCreateNewChat}
+            disabled={loadingChats}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-900/5 dark:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 hover:bg-slate-900/10 dark:hover:bg-white/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 group ${isCollapsed ? 'justify-center p-3' : ''}`}
           >
             <Plus size={isCollapsed ? 20 : 18} strokeWidth={2.5} className="shrink-0" />
             {!isCollapsed && <span className="text-sm font-semibold tracking-tight">New Chat</span>}

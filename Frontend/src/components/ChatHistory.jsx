@@ -2,12 +2,14 @@ import React, { useRef, useEffect } from 'react';
 import { User, Sparkles, MoreHorizontal } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 
-const ChatHistory = ({ loading }) => {
+const ChatHistory = () => {
   const { messages, isGenerating } = useChat();
   const endRef = useRef(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, isGenerating]);
 
   if (!messages || messages.length === 0) return null;

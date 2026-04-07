@@ -3,8 +3,8 @@ import { ArrowUp, Plus, Paperclip, MoreHorizontal, Loader2 } from 'lucide-react'
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
 
-const PromptBar = ({ content = "", setContent = () => {} }) => {
-  const { currentChatId, sendMessage, isGenerating, createNewChat } = useChat();  
+const PromptBar = ({ content = "", setContent = () => {}, onSubmit }) => {
+  const { currentChatId, sendMessage, isGenerating, createNewChat, selectChat } = useChat();  
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -23,10 +23,19 @@ const PromptBar = ({ content = "", setContent = () => {} }) => {
     if (!content || typeof content !== 'string' || !content.trim() || isBusy) return;
 
     let targetChatId = currentChatId;
+
+    if (onSubmit && !targetChatId) {
+      onSubmit(content);
+      return;
+    }
+
     if (!targetChatId) {
-      const newChat = await createNewChat(content.substring(0, 30));
-      if (!newChat) return; // Wait! If creation failed, don't crash
-      targetChatId = newChat.id;
+      const result = await createNewChat(content.substring(0, 30));
+      if (!result || !result.chat) return; // Wait! If creation failed, don't crash
+      
+      // ensure chat is selected before sending message
+      await selectChat(result.chat.id);
+      targetChatId = result.chat.id;
     }
 
     const messageToSend = content;

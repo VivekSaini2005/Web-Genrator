@@ -18,10 +18,18 @@ export const createChat = async (userId, title) => {
 
 /**
  * Gets all chats for a specific user, ordered by creation date descending.
+ * Cleans up any chats that have 0 messages before returning.
  * @param {string} userId - UUID of the user.
  * @returns {Promise<Array>} List of chat rows.
  */
 export const getChatsByUser = async (userId) => {
+  // Automatically cleanup empty chats (abandoned "New Chats")
+  await pool.query(
+    `DELETE FROM chats 
+     WHERE user_id = $1 
+     AND id NOT IN (SELECT DISTINCT chat_id FROM messages)`
+  , [userId]);
+
   const result = await pool.query(
     `SELECT * FROM chats
      WHERE user_id = $1
