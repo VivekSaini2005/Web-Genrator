@@ -10,7 +10,13 @@ import { RotateCcw } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
 
 const Home = () => {
-  const { currentChatId, messages, code, setCode, createNewChat, sendMessage, selectChat } = useChat();
+  const { currentChatId, messages, code, setCode, createNewChat, sendMessage, selectChat, isGenerating } = useChat();
+
+  const handleEnhanceUI = async () => {
+    if (!currentChatId || isGenerating) return;
+    const prompt = "Improve the UI of this project to make it modern, premium, and visually stunning. Do not break functionality. Please improve colors, spacing, add animations, and upgrade the layout.";
+    await sendMessage(prompt, currentChatId);
+  };
 
   const [activeTab, setActiveTab] = useState("preview");
   const [promptContent, setPromptContent] = useState("");
@@ -61,8 +67,34 @@ const Home = () => {
     await sendMessage(promptText, result.chat.id);
   };
 
+  const [activeFileTab, setActiveFileTab] = useState("index.html");
+
+  let parsedCode = { files: { "index.html": code } };
+  try {
+    let codeToParse = code;
+    if (typeof codeToParse === 'string') {
+      const sIdx = codeToParse.indexOf('{');
+      const eIdx = codeToParse.lastIndexOf('}');
+      if (sIdx !== -1 && eIdx !== -1 && eIdx > sIdx) {
+        codeToParse = codeToParse.substring(sIdx, eIdx + 1);
+      }
+    }
+    const parsed = JSON.parse(codeToParse);
+    if (parsed && parsed.files) {
+      parsedCode = parsed;
+    }
+  } catch (e) {
+    // legacy HTML code block
+  }
+
+  const fileNames = Object.keys(parsedCode.files || {});
+  const currentFileContent = parsedCode.files[activeFileTab] ?? "";
+
   const handleCodeChange = (value) => {
-    setCode(value || "");
+    const updated = { ...parsedCode };
+    if (!updated.files) updated.files = {};
+    updated.files[activeFileTab] = value || "";
+    setCode(JSON.stringify(updated));
   };
 
   // Initialize theme on mount
@@ -92,11 +124,10 @@ const Home = () => {
           showOptions={hasChatSelected} 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
+          onEnhanceUI={handleEnhanceUI}
         />
-
         {/* Content Area */}
         <div className="flex-1 flex overflow-hidden relative">
-          
           {!currentChatId ? (
             <section className="w-full flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-white">
               <div className="w-full max-w-4xl px-6 flex flex-col justify-center py-20 text-gray-900 dark:text-white fade-in">
@@ -140,23 +171,7 @@ const Home = () => {
               <section className="w-[60%] flex flex-col bg-gray-50 dark:bg-slate-950 overflow-hidden transition-colors duration-300">
                  {activeTab === "code" ? (
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                      <div className="h-full relative bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 shadow-sm rounded-xl overflow-hidden transition-colors duration-300">   
-                        {latestAiMessageContent && code !== latestAiMessageContent && (
-                          <button
-                            onClick={() => setCode(latestAiMessageContent)}
-                            className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg shadow-sm border border-slate-200 dark:border-white/10 transition-all active:scale-95 backdrop-blur-sm group"
-                            title="Reset to AI Output"
-                          >
-                            <RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" />
-                            <span className="text-xs font-medium">Reset Code</span>
-                          </button>
-                        )}
-                        <div className="w-full h-full pt-14 pb-2">
-                          <MonacoEditor
-                            height="100%"
-                            language="html"
-                            theme={editorTheme}
-                            value={code}
+                      <div className="h-full relative bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 shadow-sm rounded-xl overflow-hidden transition-colors duration-300 flex flex-col"><div className="flex items-center gap-1 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-slate-800/50 px-3 py-2 shrink-0">{fileNames.map(fileName => (<button key={fileName} onClick={() => setActiveFileTab(fileName)} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${activeFileTab === fileName ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800"}`}>{fileName}</button>))}</div>{latestAiMessageContent && code !== latestAiMessageContent && (<button onClick={() => setCode(latestAiMessageContent)} className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg shadow-sm border border-slate-200 dark:border-white/10 transition-all active:scale-95 backdrop-blur-sm group" title="Reset to AI Output"><RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" /><span className="text-xs font-medium">Reset Code</span></button>)}<div className="flex-1 w-full pb-2 relative"><MonacoEditor height="100%" language={activeFileTab.endsWith(".css") ? "css" : activeFileTab.endsWith(".js") ? "javascript" : "html"} theme={editorTheme} value={currentFileContent}
                             onChange={handleCodeChange}
                             options={{
                               minimap: { enabled: false },
@@ -184,3 +199,4 @@ const Home = () => {
 };
 
 export default Home;
+

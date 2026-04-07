@@ -10,7 +10,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const Navbar = ({ showOptions, activeTab, setActiveTab }) => {
+const Navbar = ({ showOptions, activeTab, setActiveTab, onEnhanceUI, isGenerating }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -82,8 +82,17 @@ const Navbar = ({ showOptions, activeTab, setActiveTab }) => {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
-        
-        {/* Theme Toggle */}
+        {showOptions && onEnhanceUI && (
+          <button 
+            onClick={onEnhanceUI} 
+            disabled={isGenerating}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Sparkles size={14} className={isGenerating ? "animate-pulse" : ""} />
+            {isGenerating ? "Enhancing..." : "Enhance UI"}
+          </button>
+        )}
+      {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
           className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-300"
@@ -130,3 +139,5 @@ const Navbar = ({ showOptions, activeTab, setActiveTab }) => {
 };
 
 export default Navbar;
+
+

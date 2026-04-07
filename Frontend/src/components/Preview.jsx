@@ -7,8 +7,37 @@ const Preview = () => {
   const containerRef = useRef(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1);
+  const handleRefresh = () => setRefreshKey(prev => prev + 1); 
+  
+  const assembleSrcDoc = () => { 
+    try { 
+      let codeToParse = code;
+      if (typeof codeToParse === 'string') {
+        const sIdx = codeToParse.indexOf('{');
+        const eIdx = codeToParse.lastIndexOf('}');
+        if (sIdx !== -1 && eIdx !== -1 && eIdx > sIdx) {
+          codeToParse = codeToParse.substring(sIdx, eIdx + 1);
+        }
+      }
+      const parsed = JSON.parse(codeToParse); 
+      if (parsed && parsed.files) { 
+        let doc = parsed.files["index.html"] || "<html><body></body></html>"; 
+        const css = parsed.files["style.css"] || ""; 
+        const js = parsed.files["script.js"] || ""; 
+        if (css) { 
+          if (doc.includes("</head>")) { 
+            doc = doc.replace("</head>", `<style>${css}</style></head>`); 
+          } else { 
+            doc = doc.replace("</body>", `<style>${css}</style></body>`); 
+          } 
+        } 
+        if (js) { 
+          doc = doc.replace("</body>", `<script>${js}</script></body>`); 
+        } 
+        return doc; 
+      } 
+    } catch(e) {} 
+    return code; 
   };
 
   useEffect(() => {
@@ -57,7 +86,7 @@ const Preview = () => {
       <div className="flex-1 p-2 md:p-4 overflow-hidden">
         <iframe
           key={refreshKey}
-          srcDoc={code}
+          srcDoc={assembleSrcDoc()}
           className="w-full h-full border-none rounded-xl bg-white shadow-xl ring-1 ring-slate-200/50 dark:ring-white/10"
           title="Website Preview"
           sandbox="allow-scripts allow-same-origin"
@@ -68,3 +97,4 @@ const Preview = () => {
 };
 
 export default Preview;
+

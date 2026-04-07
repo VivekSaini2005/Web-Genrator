@@ -1,5 +1,5 @@
 import { runAgent } from "../services/agentService.js";
-import { createMessage } from "../models/MessageModel.js";
+import { createMessage, getMessagesByChat } from "../models/MessageModel.js";
 
 // ─────────────────────────────────────────────
 // POST /api/generate
@@ -29,9 +29,22 @@ export const generateCode = async (req, res) => {
     }
 
     // ── Run AI agent ──────────────────────────
+    let previousCode = currentCode;
+    if (chatId && !previousCode) {
+      try {
+        const messages = await getMessagesByChat(chatId);
+        const aiMessages = messages.filter(m => m.role === 'ai');
+        if (aiMessages.length > 0) {
+          previousCode = aiMessages[aiMessages.length - 1].content;
+        }
+      } catch (err) {
+        console.error('Error fetching previous messages:', err.message);
+      }
+    }
+
     let generatedCode;
     try {
-      generatedCode = await runAgent(prompt.trim(), currentCode || null);
+      generatedCode = await runAgent(prompt.trim(), previousCode || null);
     } catch (aiError) {
       console.error("[GENERATE] AI agent error:", aiError.message);
       return res.status(502).json({
