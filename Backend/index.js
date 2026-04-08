@@ -13,15 +13,9 @@ dotenv.config();
 
 const app = express();
 
-// ── Middleware ────────────────────────────────────────────
 app.use(cors({
-  origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    // You can add more strict checking here for production
-    return callback(null, true);
-  },
-  credentials: true, // Required so cookies are sent/received cross-origin
+  origin: [process.env.FRONTEND_URL, "http://localhost:5173"], // set FRONTEND_URL to your Vercel URL in Render via ENV variables
+  credentials: true,
 }));
 
 app.use(express.json());     // Parse JSON request bodies

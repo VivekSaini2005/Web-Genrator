@@ -1,51 +1,58 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 /**
- * Send an email using Nodemailer and Ethereal (for development testing).
- * Ethereal is a fake SMTP service that catches emails and gives you a link to view them.
+ * Create reusable transporter
  */
-export const sendResetEmail = async (to, resetLink) => {
+const transporter = nodemailer.createTransport({
+  service: "gmail", // You can switch to SendGrid, Resend later
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS, // Use App Password (NOT real password)
+  },
+});
+
+/**
+ * Send Reset Password Email
+ * @param {string} toEmail - User email
+ * @param {string} resetLink - Full reset URL
+ */
+export const sendResetEmail = async (toEmail, resetLink) => {
   try {
-    // 1. Generate a test account on the fly
-    // (In production, replace this with your real SMTP credentials)
-    let testAccount = await nodemailer.createTestAccount();
+    // Email HTML template
+    const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Password Reset Request</h2>
+        <p>You requested to reset your password.</p>
+        <p>Click the button below to reset it:</p>
+        
+        <a href="${resetLink}" 
+           style="display:inline-block;padding:10px 20px;
+           background:#000;color:#fff;text-decoration:none;
+           border-radius:5px;margin-top:10px;">
+           Reset Password
+        </a>
 
-    // 2. Create reusable transporter object using Ethereal
-    let transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: testAccount.user, // obtained from createTestAccount
-        pass: testAccount.pass, // obtained from createTestAccount
-      },
+        <p style="margin-top:20px;">
+          If you didn't request this, please ignore this email.
+        </p>
+
+        <p style="color:gray;font-size:12px;">
+          This link will expire in 15 minutes.
+        </p>
+      </div>
+    `;
+
+    // Send email
+    await transporter.sendMail({
+      from: `"Web Generator" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject: "Reset Your Password",
+      html,
     });
 
-    // 3. Setup email data
-    let info = await transporter.sendMail({
-      from: '"Web Gen AI" <noreply@webgenerator.com>',
-      to, // array of receivers or comma-separated string
-      subject: "Password Reset Request",
-      text: `You requested a password reset. Please click on the following link within 15 minutes to reset your password: ${resetLink}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-          <h2 style="color: #10b981;">Password Reset Request</h2>
-          <p>We received a request to reset your password. If you didn't make this request, just ignore this email.</p>
-          <p>Otherwise, you can reset your password using this link:</p>
-          <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #10b981; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">Reset Password</a>
-          <p>This link will expire in 15 minutes.</p>
-          <hr style="border: 1px solid #eee; margin-top: 30px;"/>
-          <p style="font-size: 12px; color: #888;">Web Generator Team</p>
-        </div>
-      `,
-    });
-
-    // 4. Log the Ethereal URL so the developer can click it and view the email!
-    console.log("Message sent: %s", info.messageId);
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-    
+    console.log("✅ Reset password email sent to:", toEmail);
   } catch (error) {
-    console.error("[EMAIL SERVICE] Error sending email:", error);
-    throw new Error('Could not send reset email. Please try again later.');
+    console.error("❌ Email sending failed:", error);
+    throw new Error("Failed to send reset email");
   }
 };

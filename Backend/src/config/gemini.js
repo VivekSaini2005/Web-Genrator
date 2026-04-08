@@ -53,6 +53,7 @@ Return response ONLY in EXACTLY this JSON format:
 * Add proper layout sections (navbar, hero, sections, footer)
 * Use Google Fonts
 * Maintain visual hierarchy
+* If website needs images, use free image sources (like Unsplash) and provide image URLs in the code
 
 ---
 

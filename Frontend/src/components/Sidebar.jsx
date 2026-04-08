@@ -206,15 +206,15 @@ const Sidebar = () => {
                     </div>
                     <div className="overflow-hidden whitespace-nowrap">
                       <div className="text-sm font-medium text-[var(--text-primary)] truncate">{user?.name}</div>
-                      <div className="text-[11px] text-[var(--text-secondary)]">Pro Account</div>
+                      {/* <div className="text-[11px] text-[var(--text-secondary)]">Pro Account</div> */}
                     </div>
                   </Link>
-                <button 
+                {/* <button 
                   onClick={() => navigate('/settings')}
                   className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-md transition-colors"
                 >
                   <Settings size={15} />
-                </button>
+                </button> */}
               </div>
             ) : (
               <div className="flex flex-col items-center gap-4 py-2">

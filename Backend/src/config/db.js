@@ -6,23 +6,44 @@ dotenv.config();
 
 const { Pool } = pg;
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, 
+  },
+});
+export default pool;
+
+
+
+
+
+
+// import pg from "pg";
+// import dotenv from "dotenv";
+
+// // Load environment variables from .env file
+// dotenv.config();
+
+// const { Pool } = pg;
+
 /**
  * PostgreSQL connection pool.
  * Using a pool (not single client) for production-grade connection reuse.
  * Pool automatically manages multiple concurrent DB connections.
  */
-const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "Web-Generator",
-  password: process.env.DB_PASSWORD,
-  port: 5432,
+// const pool = new Pool({
+//   user: "postgres",
+//   host: "localhost",
+//   database: "Web-Generator",
+//   password: process.env.DB_PASSWORD,
+//   port: 5432,
 
-  // Pool configuration for production readiness
-  max: 10,              // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000,  // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // Throw if connection not acquired in 2s
-});
+//   // Pool configuration for production readiness
+//   max: 10,              // Maximum number of clients in the pool
+//   idleTimeoutMillis: 30000,  // Close idle clients after 30 seconds
+//   connectionTimeoutMillis: 2000, // Throw if connection not acquired in 2s
+// });
 
 /**
  * Verify database connectivity on startup.
@@ -46,4 +67,3 @@ export const testDBConnection = async () => {
 };
 
 // Export the pool for use across all models/services
-export default pool;

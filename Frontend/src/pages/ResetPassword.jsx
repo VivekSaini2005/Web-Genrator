@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { KeyRound, Lock, CheckCircle2, AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import apiClient from '../api/apiClient';
 
 const ResetPassword = () => {
@@ -43,79 +44,101 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-bg px-6 py-12 selection:bg-primary/30 text-text-primary">
-      <div className="card w-full max-w-md">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 dark:bg-slate-950 px-4 py-12 text-slate-900 dark:text-slate-100 relative overflow-hidden">
+      {/* Decorative background blur */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none" />
+      
+      <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl w-full max-w-md shadow-xl z-10 p-8">
         
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
-             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        <div className="flex flex-col items-center text-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mb-4 text-indigo-600 dark:text-indigo-400 shadow-inner">
+            <KeyRound strokeWidth={2.5} size={28} />
           </div>
-          <div>
-             <h2 className="text-lg font-semibold text-text-primary leading-none mb-1">New password</h2>
-             <p className="text-xs text-text-secondary opacity-70">Enter your new credentials below</p>
-          </div>
+          <h2 className="text-2xl font-bold tracking-tight mb-2">Set new password</h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400">
+            Your new password must be different from previously used passwords.
+          </p>
         </div>
 
         {status.message && (
-          <div className={`mb-6 border text-sm p-4 rounded-xl flex items-center gap-3 ${
+          <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium ${
             status.type === 'error' 
-              ? 'bg-red-400/10 border-red-400/20 text-red-400' 
-              : 'bg-emerald-400/10 border-emerald-400/20 text-emerald-400'
+              ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-500/20' 
+              : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20'
           }`}>
-             {status.type === 'error' ? (
-              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            ) : (
-              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            )}
-            {status.message}
+            {status.type === 'error' ? <AlertCircle size={18} className="shrink-0" /> : <CheckCircle2 size={18} className="shrink-0" />}
+            <p>{status.message}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="flex flex-col gap-4">
-            <div>
-              <label className="block text-xs font-bold text-text-secondary uppercase tracking-widest mb-1.5 ml-1">New Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="input-field"
-                disabled={loading || status.type === 'success'}
-              />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                New Password
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                  <Lock size={18} />
+                </div>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full pl-10 px-4 py-2.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm placeholder:text-gray-400 disabled:opacity-50"
+                  disabled={loading || status.type === 'success'}
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-bold text-text-secondary uppercase tracking-widest mb-1.5 ml-1">Confirm Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="input-field"
-                disabled={loading || status.type === 'success'}
-              />
+
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                Confirm Password
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                  <Lock size={18} />
+                </div>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full pl-10 px-4 py-2.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm placeholder:text-gray-400 disabled:opacity-50"
+                  disabled={loading || status.type === 'success'}
+                />
+              </div>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading || status.type === 'success'}
-            className="btn-primary w-full"
+            className="w-full mt-2 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-indigo-500/20"
           >
             {loading ? (
-              <div className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                <span>Resetting...</span>
-              </div>
-            ) : "Update Password"}
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                <span>Resetting Password...</span>
+              </>
+            ) : status.type === 'success' ? (
+              <>
+                <CheckCircle2 size={18} />
+                <span>Redirecting...</span>
+              </>
+            ) : (
+              <span>Reset Password</span>
+            )}
           </button>
         </form>
         
-        <div className="mt-8 pt-6 border-t border-border/50 text-center">
-          <Link to="/forgot-password" className="text-[10px] font-bold text-text-secondary uppercase tracking-widest hover:text-primary transition-colors">
-            Request a new link instead
+        <div className="mt-8 text-center">
+          <Link to="/login" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">
+            <ArrowLeft size={16} />
+            Back to log in
           </Link>
         </div>
       </div>
