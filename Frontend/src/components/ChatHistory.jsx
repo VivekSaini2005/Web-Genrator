@@ -106,6 +106,8 @@ const renderMessageContent = (msg, isUser, isError) => {
       let cleanEscapes = codeToParse.replace(/\\([^"\\\/bfnrtu])/g, '\\\\$1');
       // 2. Remove trailing commas
       cleanEscapes = cleanEscapes.replace(/,\s*([\]}])/g, '$1');
+      // 3. Fix missing commas between properties (e.g. "value"\n"key")
+      cleanEscapes = cleanEscapes.replace(/"\s*\n\s*"/g, '",\n"');
       parsed = JSON.parse(cleanEscapes);
     }
     if (parsed && typeof parsed === 'object' && (parsed.title || parsed.plan)) {

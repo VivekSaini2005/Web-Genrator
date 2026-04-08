@@ -103,3 +103,6 @@ Let's trace how the full stack manages a user's web generation request flawlessl
 **4. Conversational History (Follow-Up Prompts)**
 * **Action:** The user replies in the PromptBar: *"Make the background dark slate and use a bold Roboto font."*
 * **Execution:** Because the frontend tracks that we are locked in `chat_101`, the backend passes the previous code block back to Gemini. The new prompt and the revised dark mode output code are neatly sequenced into the `messages` table under the same `chat_101` ID constraint, establishing perfect conversational chronological history for lightning-fast sidebar retrieval.
+
+
+### Live Link : https://web-genrator.vercel.app/

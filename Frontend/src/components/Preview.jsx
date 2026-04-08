@@ -41,6 +41,7 @@ const Preview = () => {
       } catch (e1) {
         let cleanEscapes = codeToParse.replace(/\\([^"\\\/bfnrtu])/g, '\\\\$1');
         cleanEscapes = cleanEscapes.replace(/,\s*([\]}])/g, '$1');
+        cleanEscapes = cleanEscapes.replace(/"\s*\n\s*"/g, '",\n"');
         parsed = JSON.parse(cleanEscapes);
       }
       
