@@ -14,7 +14,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: [process.env.FRONTEND_URL, "http://localhost:5173"], // set FRONTEND_URL to your Vercel URL in Render via ENV variables
+  origin: [process.env.FRONTEND_URL, "http://localhost:5173","https://web-genrator.vercel.app/"], // set FRONTEND_URL to your Vercel URL in Render via ENV variables
   credentials: true,
 }));
 
