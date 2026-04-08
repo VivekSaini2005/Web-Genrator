@@ -2,7 +2,7 @@ import axios from "axios";
 
 // 1. Setup Axios instance
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://web-genrator.onrender.com/api',
   timeout: 300000,
   withCredentials: true,
   headers: {
