@@ -47,10 +47,27 @@ export const sendMessage = async (req, res) => {
 
     // Get previous messages to maintain conversation context
     const previousMessages = await getMessagesByChat(chatId);
-    const history = previousMessages.map((msg) => ({
-      role: msg.role === "ai" ? "model" : "user",
-      parts: [{ text: msg.content }],
-    }));
+    
+    // Filter history to ensure strictly alternating user/model roles to prevent Gemini API 400 errors
+    const history = [];
+    let expectedRole = "user";
+    
+    for (const msg of previousMessages) {
+      const mappedRole = msg.role === "ai" ? "model" : "user";
+      if (mappedRole === expectedRole) {
+        history.push({
+          role: mappedRole,
+          parts: [{ text: msg.content }],
+        });
+        expectedRole = expectedRole === "user" ? "model" : "user";
+      }
+    }
+
+    // Ensure the last role in history was 'model' before we push the new 'user' prompt
+    // If the history ends with 'user' (e.g. previous API failure), we just pop it so we can push the new one.
+    if (history.length > 0 && history[history.length - 1].role === "user") {
+      history.pop();
+    }
 
     // Add the current prompt
     history.push({

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Code2, Copy, Check, Download } from 'lucide-react';
+import CodeShimmer from './CodeShimmer';
 
 const Editor = ({ code, setCode, loading }) => {
   const [copied, setCopied] = useState(false);
@@ -56,13 +57,17 @@ const Editor = ({ code, setCode, loading }) => {
 
         {/* Editor Area */}
         <div className="flex-1 relative bg-[var(--bg-primary)]">
-          <textarea
-            value={loading ? "" : (code || "")}
-            onChange={(e) => setCode(e.target.value)}
-            className="absolute inset-0 w-full h-full p-5 bg-transparent text-[var(--text-primary)] font-mono text-[13px] leading-relaxed resize-none outline-none focus:ring-0 custom-scrollbar border-none placeholder:text-[var(--text-secondary)]/50"
-            placeholder={loading ? "" : "// Generated component code will appear here..."}
-            spellCheck="false"
-          />
+          {loading ? (
+            <CodeShimmer />
+          ) : (
+            <textarea
+              value={code || ""}
+              onChange={(e) => setCode(e.target.value)}
+              className="absolute inset-0 w-full h-full p-5 bg-transparent text-[var(--text-primary)] font-mono text-[13px] leading-relaxed resize-none outline-none focus:ring-0 custom-scrollbar border-none placeholder:text-[var(--text-secondary)]/50"
+              placeholder="// Generated component code will appear here..."
+              spellCheck="false"
+            />
+          )}
         </div>
       </div>
     </div>

@@ -18,6 +18,7 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [loadingChats, setLoadingChats] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [code, setCode] = useState("");
 
   const activeChatRef = useRef(null);
@@ -118,6 +119,7 @@ export const ChatProvider = ({ children }) => {
 
     setMessages((prev) => [...prev, tempMessage]);
     setIsGenerating(true);
+    setIsPreviewLoading(true);
 
     try {
       const response = await apiSendMessage(targetChatId, content);
@@ -137,7 +139,12 @@ export const ChatProvider = ({ children }) => {
       }
     } finally {
       if (activeChatRef.current === targetChatId) {
-        setIsGenerating(false);
+        setTimeout(() => {
+          if (activeChatRef.current === targetChatId) {
+            setIsGenerating(false);
+            setIsPreviewLoading(false);
+          }
+        }, 800); // 800ms fake delay for realism
       }
     }
   };
@@ -168,6 +175,7 @@ export const ChatProvider = ({ children }) => {
         setCode,
         loadingChats,
         isGenerating,
+        isPreviewLoading,
         loadChats,
         selectChat,
         createNewChat,

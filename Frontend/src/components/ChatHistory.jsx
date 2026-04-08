@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { User, Sparkles, MoreHorizontal, LayoutList, Lightbulb, FileCode2, ChevronDown } from 'lucide-react';
+import { User, MoreHorizontal, LayoutList, Lightbulb, FileCode2, ChevronDown } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 
 const PlanViewer = ({ plan }) => {

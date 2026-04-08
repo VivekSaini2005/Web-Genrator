@@ -5,12 +5,13 @@ import Navbar from "../components/Navbar";
 import ChatHistory from "../components/ChatHistory";
 import EmptyState from "../components/EmptyState";
 import Preview from "../components/Preview";
+import CodeShimmer from "../components/CodeShimmer";
 import { useChat } from "../context/ChatContext";
 import { RotateCcw } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
 
 const Home = () => {
-  const { currentChatId, messages, code, setCode, createNewChat, sendMessage, selectChat, isGenerating } = useChat();
+  const { currentChatId, messages, code, setCode, createNewChat, sendMessage, selectChat, isGenerating, isPreviewLoading } = useChat();
 
   const handleEnhanceUI = async () => {
     if (!currentChatId || isGenerating) return;
@@ -195,17 +196,38 @@ const Home = () => {
               <section className="w-[60%] flex flex-col bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 relative">
                  {activeTab === "code" ? (
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                      <div className="h-full relative bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-[var(--shadow-sm)] rounded-xl overflow-hidden transition-colors duration-300 flex flex-col"><div className="flex items-center gap-1 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2 shrink-0">{fileNames.map(fileName => (<button key={fileName} onClick={() => setActiveFileTab(fileName)} className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${activeFileTab === fileName ? "bg-[var(--bg-primary)] text-[var(--accent)] shadow-sm" : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"}`}>{fileName}</button>))}</div>{latestAiMessageContent && code !== latestAiMessageContent && (<button onClick={() => setCode(latestAiMessageContent)} className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-primary)]/80 hover:bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg shadow-sm border border-[var(--border-color)] transition-all active:scale-95 backdrop-blur-sm group" title="Reset to AI Output"><RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" /><span className="text-xs font-medium">Reset Code</span></button>)}<div className="flex-1 w-full pb-2 relative"><MonacoEditor height="100%" language={activeFileTab.endsWith(".css") ? "css" : activeFileTab.endsWith(".js") ? "javascript" : "html"} theme={editorTheme} value={currentFileContent}
-                            onChange={handleCodeChange}
-                            options={{
-                              minimap: { enabled: false },
-                              fontSize: 14,
-                              wordWrap: "on",
-                              scrollBeyondLastLine: false,
-                              readOnly: false,
-                              padding: { top: 16, bottom: 16 },
-                            }}
-                          />
+                      <div className="h-full relative bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-[var(--shadow-sm)] rounded-xl overflow-hidden transition-colors duration-300 flex flex-col">
+                        <div className="flex items-center gap-1 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2 shrink-0">
+                          {fileNames.map(fileName => (
+                            <button key={fileName} onClick={() => setActiveFileTab(fileName)} className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${activeFileTab === fileName ? "bg-[var(--bg-primary)] text-[var(--accent)] shadow-sm" : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"}`}>{fileName}</button>
+                          ))}
+                        </div>
+                        {latestAiMessageContent && code !== latestAiMessageContent && (
+                          <button onClick={() => setCode(latestAiMessageContent)} className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-primary)]/80 hover:bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg shadow-sm border border-[var(--border-color)] transition-all active:scale-95 backdrop-blur-sm group" title="Reset to AI Output">
+                            <RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" />
+                            <span className="text-xs font-medium">Reset Code</span>
+                          </button>
+                        )}
+                        <div className="flex-1 w-full pb-2 relative">
+                          {(isGenerating || isPreviewLoading) ? (
+                            <CodeShimmer />
+                          ) : (
+                            <MonacoEditor 
+                              height="100%" 
+                              language={activeFileTab.endsWith(".css") ? "css" : activeFileTab.endsWith(".js") ? "javascript" : "html"} 
+                              theme={editorTheme} 
+                              value={currentFileContent}
+                              onChange={handleCodeChange}
+                              options={{
+                                minimap: { enabled: false },
+                                fontSize: 14,
+                                wordWrap: "on",
+                                scrollBeyondLastLine: false,
+                                readOnly: false,
+                                padding: { top: 16, bottom: 16 },
+                              }}
+                            />
+                          )}
                         </div>
                       </div>
                     </div>

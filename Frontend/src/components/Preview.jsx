@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useChat } from '../context/ChatContext';
 import { RefreshCw, MonitorPlay } from 'lucide-react';
+import PreviewShimmer from './PreviewShimmer';
 
 const Preview = () => {
-  const { messages, code } = useChat();
+  const { messages, code, isPreviewLoading, isGenerating } = useChat();
   const containerRef = useRef(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -71,6 +72,24 @@ const Preview = () => {
     }
   }, [messages]);
 
+  if (isPreviewLoading || isGenerating) {
+    return (
+      <div className="flex flex-col h-full bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 p-4">
+        <div className="flex-1 flex flex-col bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-hidden shadow-[var(--shadow-sm)]">
+          {/* Header Bar */}
+          <div className="flex items-center justify-between px-4 py-2.5 bg-[var(--bg-secondary)] border-b border-[var(--border-color)] shrink-0">
+            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+              <MonitorPlay size={16} className="text-[var(--accent)]" />
+              <span className="text-[13px] font-medium text-[var(--text-primary)]">Live Preview</span>
+            </div>
+          </div>
+          <div className="flex-1 relative overflow-hidden bg-[var(--bg-primary)]">
+            <PreviewShimmer />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!messages || messages.length === 0 || !code) {        
     return (
