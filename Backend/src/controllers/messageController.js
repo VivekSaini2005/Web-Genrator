@@ -120,6 +120,15 @@ export const sendMessage = async (req, res) => {
       }
     } catch (aiError) {
       console.error("Gemini API Error:", aiError);
+      // Handle Gemini API high demand (503) gracefully
+      let userMessage = "The AI model is currently experiencing high demand. Please try again in a few moments.";
+      if (aiError && aiError.message && aiError.message.includes('503')) {
+        return res.status(503).json({ error: userMessage });
+      }
+      // If Google returns a structured error
+      if (aiError && aiError.error && aiError.error.code === 503) {
+        return res.status(503).json({ error: userMessage });
+      }
       return res.status(502).json({ error: "Failed to communicate with AI provider." });
     }
 
