@@ -79,7 +79,9 @@ export const ChatProvider = ({ children }) => {
     }
 
     try {
+      console.log("Creating new chat apiCreateChat with title:");
       const newChat = await apiCreateChat(title);
+      console.log("New chat created:");
       setChats((prev) => [newChat, ...prev]);
       setCurrentChatId(newChat.id);
       activeChatRef.current = newChat.id;
@@ -122,8 +124,9 @@ export const ChatProvider = ({ children }) => {
     setIsPreviewLoading(true);
 
     try {
+      // console.log("apisendmessage");
       const response = await apiSendMessage(targetChatId, content);
-      
+      // console.log("received from apisendmessage:");
       if (activeChatRef.current === targetChatId) {
         setMessages((prev) => {
           // Remove temp message and add real messages

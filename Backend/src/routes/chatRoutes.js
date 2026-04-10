@@ -4,7 +4,7 @@ import { getMessages, sendMessage } from "../controllers/messageController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-
+// console.log("Chat routes initialized.");
 router.use(verifyToken);
 // Chat Routes
 router.post("/", createChat);

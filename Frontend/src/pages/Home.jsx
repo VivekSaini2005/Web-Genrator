@@ -56,16 +56,20 @@ const Home = () => {
 
   const handleInitialSubmit = async (promptText) => {
     // 1. call createNewChat()
+    // console.log("Creating new chat with prompt:", promptText);
     const result = await createNewChat(promptText.substring(0, 30));
     if (!result || !result.chat) return;
-
+    // console.log("New chat created:");
     // ensure chat is selected before sending message
+    // console.log("Selecting new chat with ID:", result.chat.id);
     await selectChat(result.chat.id);
-
+    // console.log("New chat selected with ID:", result.chat.id);
     setPromptContent("");
     
     // 2. sendMessage(prompt)
+    // console.log("Sending initial message to new chat with ID:", result.chat.id);
     await sendMessage(promptText, result.chat.id);
+    // console.log("Initial message sent to new chat with ID:", result.chat.id);
   };
 
   const [activeFileTab, setActiveFileTab] = useState("index.html");

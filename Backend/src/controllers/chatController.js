@@ -6,6 +6,8 @@ import { createChat as createChatModel, getChatsByUser, deleteChat as deleteChat
  */
 export const createChat = async (req, res) => {
   try {
+    // console.log("call to createChat route");
+    // console.log("Creating chat for user:", req.user.id);
     const userId = req.user.id;
     const { title } = req.body;
 
@@ -14,6 +16,7 @@ export const createChat = async (req, res) => {
     }
 
     const newChat = await createChatModel(userId, title);
+    // console.log("Chat created with ID:", newChat.id);
     return res.status(201).json(newChat);
   } catch (error) {
     console.error("Error creating chat:", error);

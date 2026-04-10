@@ -31,6 +31,7 @@ export const getMessages = async (req, res) => {
  */
 export const sendMessage = async (req, res) => {
   try {
+    // console.log("call to sendMessage");
     const { id: chatId } = req.params;
     const { content } = req.body;
     const userId = req.user.id;
@@ -82,6 +83,7 @@ export const sendMessage = async (req, res) => {
     // Ensure we send it to an appropriate model. We use gemini-1.5-flash as the standard fast text model.
     let aiTextResponse = "";
     try {
+      // console.log("Running Gemini API with history:", history);
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: history,
@@ -90,7 +92,7 @@ export const sendMessage = async (req, res) => {
         },
       });
       aiTextResponse = response.text || "Sorry, I couldn't generate a response.";
-      
+      // console.log("Raw response from Gemini API:", aiTextResponse);
       // Clean up the AI response: strip markdown fences if the AI included them
       if (aiTextResponse.startsWith("```html")) {
         aiTextResponse = aiTextResponse.replace("```html", "").trim();
