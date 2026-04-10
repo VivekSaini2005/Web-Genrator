@@ -117,7 +117,7 @@ const Home = () => {
                  {/* PromptBar - Centered at Bottom for Landing */}
                  <div className="absolute bottom-8 left-0 w-full px-6 z-20 pointer-events-none transition-colors duration-300">
                     <div className="w-full max-w-2xl mx-auto pointer-events-auto hover:-translate-y-1 transition-transform duration-500 shadow-lg rounded-xl">
-                       <PromptBar content={promptContent} setContent={setPromptContent} onSubmit={handleInitialSubmit} />
+                      <PromptBar content={promptContent} setContent={setPromptContent} onSubmit={handleInitialSubmit} onSendStart={() => setActiveView("preview")} />
                     </div>
                  </div>
               </section>
@@ -147,7 +147,7 @@ const Home = () => {
                       )}
                     </div>
                     <div className="sticky bottom-0 w-full border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4">
-                      <PromptBar content={promptContent} setContent={setPromptContent} />
+                      <PromptBar content={promptContent} setContent={setPromptContent} onSendStart={() => setActiveView("preview")} />
                     </div>
                   </section>
                 )}

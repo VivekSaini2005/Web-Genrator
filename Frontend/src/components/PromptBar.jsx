@@ -3,7 +3,7 @@ import { ArrowUp, Plus, Paperclip, MoreHorizontal, Loader2 } from 'lucide-react'
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
 
-const PromptBar = ({ content = "", setContent = () => {}, onSubmit }) => {
+const PromptBar = ({ content = "", setContent = () => {}, onSubmit, onSendStart }) => {
   const { currentChatId, sendMessage, isGenerating, createNewChat, selectChat } = useChat();  
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -22,10 +22,12 @@ const PromptBar = ({ content = "", setContent = () => {}, onSubmit }) => {
     if (e) e.preventDefault();
     if (!content || typeof content !== 'string' || !content.trim() || isBusy) return;
 
+    if (onSendStart) onSendStart();
+
     let targetChatId = currentChatId;
 
     if (onSubmit && !targetChatId) {
-      onSubmit(content);
+      await onSubmit(content);
       return;
     }
 
