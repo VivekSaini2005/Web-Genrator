@@ -57,11 +57,11 @@ const PromptBar = ({ content = "", setContent = () => {}, onSubmit }) => {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 group">
+    <div className="w-full px-1 sm:px-2 md:px-4 group">
       <div className="relative flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-[var(--shadow-sm)] rounded-2xl transition-all duration-300 hover:shadow-[var(--shadow-md)] hover:border-slate-300 dark:hover:border-slate-600 focus-within:border-slate-400 dark:focus-within:border-slate-500 focus-within:shadow-[var(--shadow-md)]">
 
         {/* Input Area */}
-        <div className="flex items-end gap-2 px-3 py-2.5">
+        <div className="flex items-end gap-1.5 sm:gap-2 px-2 py-2 sm:px-3 sm:py-2.5">
           <button className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-lg hover:bg-[var(--bg-secondary)] shrink-0 mb-0.5">
             <Plus size={20} strokeWidth={2.5} />
           </button>
@@ -72,7 +72,7 @@ const PromptBar = ({ content = "", setContent = () => {}, onSubmit }) => {
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={!user ? "Login to start chatting..." : "What should I build today?"}
-            className="flex-1 bg-transparent border-none py-2 text-[15px] text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-0 outline-none resize-none max-h-[200px] overflow-y-auto leading-relaxed transition-colors disabled:opacity-50"
+            className="flex-1 min-w-0 bg-transparent border-none py-2 text-[14px] sm:text-[15px] text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-0 outline-none resize-none max-h-[200px] overflow-y-auto leading-relaxed transition-colors disabled:opacity-50"
             rows={1}
             disabled={!user || isBusy}
           />
@@ -96,7 +96,7 @@ const PromptBar = ({ content = "", setContent = () => {}, onSubmit }) => {
         </div>
       </div>
       
-      <p className="text-[11px] text-center text-[var(--text-secondary)] mt-3">
+      <p className="text-[10px] sm:text-[11px] text-center text-[var(--text-secondary)] mt-2 sm:mt-3">
         WebGen can make mistakes. Consider verifying important information.
       </p>
     </div>

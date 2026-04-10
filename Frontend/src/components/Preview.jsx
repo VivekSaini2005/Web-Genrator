@@ -75,8 +75,8 @@ const Preview = () => {
 
   if (isPreviewLoading || isGenerating) {
     return (
-      <div className="flex flex-col h-full bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 p-4">
-        <div className="flex-1 flex flex-col bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-hidden shadow-[var(--shadow-sm)]">
+      <div className="flex h-full w-full items-center justify-center bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 p-2 sm:p-3 md:p-4">
+        <div className="flex h-full w-full max-w-[1600px] flex-col bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-hidden shadow-[var(--shadow-sm)]">
           {/* Header Bar */}
           <div className="flex items-center justify-between px-4 py-2.5 bg-[var(--bg-secondary)] border-b border-[var(--border-color)] shrink-0">
             <div className="flex items-center gap-2 text-[var(--text-secondary)]">
@@ -94,8 +94,8 @@ const Preview = () => {
 
   if (!messages || messages.length === 0 || !code) {        
     return (
-      <div className="flex flex-col h-full bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 p-4">
-        <div className="flex-1 flex flex-col bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-hidden shadow-[var(--shadow-sm)]">
+      <div className="flex h-full w-full items-center justify-center bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 p-2 sm:p-3 md:p-4">
+        <div className="flex h-full w-full max-w-[1600px] flex-col bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-hidden shadow-[var(--shadow-sm)]">
           {/* Header Bar */}
           <div className="flex items-center justify-between px-4 py-2.5 bg-[var(--bg-secondary)] border-b border-[var(--border-color)] shrink-0">
             <div className="flex items-center gap-2 text-[var(--text-secondary)]">
@@ -112,8 +112,8 @@ const Preview = () => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 p-4">
-      <div className="flex-1 flex flex-col bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-hidden shadow-[var(--shadow-sm)]">
+    <div className="flex h-full w-full items-center justify-center bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 p-2 sm:p-3 md:p-4">
+      <div className="flex h-full w-full max-w-[1600px] flex-col bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-hidden shadow-[var(--shadow-sm)]">
         {/* Header Bar */}
         <div className="flex items-center justify-between px-4 py-2.5 bg-[var(--bg-secondary)] border-b border-[var(--border-color)] shrink-0">
           <div className="flex items-center gap-2 text-[var(--text-secondary)]">

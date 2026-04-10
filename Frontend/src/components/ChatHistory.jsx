@@ -200,7 +200,7 @@ const ChatHistory = () => {
   if (!messages || messages.length === 0) return null;
 
   return (
-    <div className="w-full flex w-full flex-col gap-6 pb-20 transition-all duration-500">
+    <div className="w-full h-full flex flex-col gap-4 sm:gap-5 md:gap-6 overflow-y-auto custom-scrollbar px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6 pb-24 transition-all duration-500">
       {messages.map((msg, idx) => {
         const isUser = msg.role === 'user';
         const isError = msg.role === 'error';

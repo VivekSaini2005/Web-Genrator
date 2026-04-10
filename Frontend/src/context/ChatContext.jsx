@@ -42,6 +42,27 @@ export const ChatProvider = ({ children }) => {
     loadChats();
   }, [loadChats]);
 
+  // Restore chat history on app start
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("chatHistory");
+      if (saved) {
+        setMessages(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error("Failed to restore chat history:", error);
+    }
+  }, []);
+
+  // Persist chat history whenever messages change
+  useEffect(() => {
+    try {
+      localStorage.setItem("chatHistory", JSON.stringify(messages));
+    } catch (error) {
+      console.error("Failed to persist chat history:", error);
+    }
+  }, [messages]);
+
   // 2. selectChat(chatId) - sets current chat & fetches messages
   const selectChat = async (chatId) => {
     try {
@@ -53,7 +74,6 @@ export const ChatProvider = ({ children }) => {
 
       setCurrentChatId(chatId);
       activeChatRef.current = chatId; // Track active chat to prevent race conditions
-      setMessages([]); // clear current messages immediately
       
       const data = await apiGetMessages(chatId);
 
@@ -168,6 +188,35 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
+  // 6. continueLastChat() - selects the current or most recent chat and loads messages
+  const continueLastChat = useCallback(async () => {
+    if (!user) return null;
+
+    // If a chat is already active, keep the current in-memory messages untouched.
+    if (currentChatId) {
+      return currentChatId;
+    }
+
+    let recentChats = chats;
+    if (!recentChats || recentChats.length === 0) {
+      try {
+        recentChats = await apiGetChats();
+        setChats(recentChats || []);
+      } catch (error) {
+        console.error("Failed to load chats for continue:", error);
+        return null;
+      }
+    }
+
+    if (!recentChats || recentChats.length === 0) return null;
+
+    const lastChat = recentChats[0];
+    if (!lastChat?.id) return null;
+
+    await selectChat(lastChat.id);
+    return lastChat.id;
+  }, [user, currentChatId, chats]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -182,6 +231,7 @@ export const ChatProvider = ({ children }) => {
         loadChats,
         selectChat,
         createNewChat,
+        continueLastChat,
         resetChat,
         sendMessage,
         setMessages,
