@@ -174,3 +174,250 @@
   0%, 50%, 100% { opacity: 1; }
   25%, 75% { opacity: 0; }
 }
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer utilities {
+  .app-layout-fluid,
+  .home-layout-fluid,
+  .workspace-layout-fluid,
+  .workspace-content-fluid,
+  .workspace-shell-fluid,
+  .workspace-panel-fluid {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 640px) {
+  .workspace-content-fluid,
+  .workspace-shell-fluid,
+  .workspace-panel-fluid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .chat-editor-preview-layout {
+    flex-direction: row;
+  }
+
+  .chat-layout-section {
+    width: 44% !important;
+    max-width: 44%;
+    overflow: hidden;
+  }
+
+  .editor-preview-layout-section {
+    width: 56% !important;
+    max-width: 56%;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 767px) {
+  .chat-editor-preview-layout {
+    flex-direction: column;
+  }
+
+  .chat-layout-section,
+  .editor-preview-layout-section {
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .chat-layout-section {
+    border-right-width: 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .chat-scroll-area,
+  .editor-scroll-area,
+  .preview-scroll-area {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+.monaco-editor-container-fluid,
+.editor-shell-fluid,
+.monaco-host-fluid {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.monaco-host-fluid {
+  height: 100%;
+}
+
+@media (max-width: 767px) {
+  .monaco-editor-container-fluid {
+    padding: 12px;
+  }
+
+  .editor-shell-fluid {
+    height: auto;
+    min-height: 320px;
+  }
+
+  .monaco-host-fluid {
+    height: clamp(280px, 46vh, 420px);
+    min-height: 280px;
+  }
+}
+
+.app-sidebar-responsive,
+.file-explorer-responsive {
+  min-width: 0;
+  max-width: 100%;
+  overflow: auto;
+}
+
+@media (max-width: 767px) {
+  .app-sidebar-responsive.sidebar-expanded {
+    width: 13.5rem;
+  }
+
+  .app-sidebar-responsive.sidebar-collapsed {
+    width: 3.5rem;
+  }
+
+  .file-explorer-responsive {
+    width: 100%;
+    max-width: 20rem;
+  }
+}
+
+@media (max-width: 499px) {
+  .app-sidebar-responsive {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  button,
+  input,
+  textarea,
+  select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    font-size: 0.875rem;
+  }
+
+  input,
+  textarea,
+  select {
+    margin-bottom: 0.5rem;
+  }
+
+  button {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 1024px) {
+  /* tablet adjustments */
+  .workspace-shell-fluid,
+  .workspace-panel-fluid,
+  .chat-layout-section,
+  .editor-preview-layout-section,
+  .app-sidebar-responsive,
+  .file-explorer-responsive {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .workspace-panel-fluid {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .editor-scroll-area,
+  .preview-scroll-area,
+  .chat-scroll-area {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* mobile layout changes */
+  .chat-editor-preview-layout {
+    flex-direction: column;
+  }
+
+  .chat-layout-section,
+  .editor-preview-layout-section,
+  .workspace-content-fluid,
+  .workspace-shell-fluid,
+  .workspace-panel-fluid {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .workspace-panel-fluid {
+    margin: 8px 8px 0;
+  }
+
+  .workspace-content-fluid,
+  .workspace-shell-fluid,
+  .editor-scroll-area,
+  .preview-scroll-area,
+  .chat-scroll-area {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* small mobile fine tuning */
+  .workspace-panel-fluid,
+  .editor-scroll-area,
+  .preview-scroll-area,
+  .chat-scroll-area,
+  .monaco-editor-container-fluid {
+    overflow-x: hidden;
+  }
+
+  .workspace-content-fluid,
+  .workspace-shell-fluid,
+  .workspace-panel-fluid,
+  .editor-scroll-area,
+  .preview-scroll-area,
+  .chat-scroll-area {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .app-sidebar-responsive.sidebar-expanded {
+    width: 12rem;
+  }
+}

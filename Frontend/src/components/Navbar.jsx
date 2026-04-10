@@ -52,41 +52,43 @@ const Navbar = ({ showOptions, activeTab, setActiveTab, onEnhanceUI, isGeneratin
   };
 
   return (
-    <nav className="h-14 w-full bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border-color)] px-5 flex items-center justify-between sticky top-0 z-30 shrink-0 transition-colors duration-300">
+    <nav className="w-full max-w-full min-h-14 md:h-14 bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border-color)] px-3 md:px-5 py-2 md:py-0 flex flex-wrap items-center justify-between gap-2 md:gap-3 sticky top-0 z-30 shrink-0 overflow-x-hidden transition-colors duration-300">
 
       {/* Left: Page Title */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3 shrink-0 min-w-0">
         <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-        <h2 className="text-[13px] font-medium text-[var(--text-secondary)]">
+        <h2 className="hidden sm:block text-[13px] font-medium text-[var(--text-secondary)] truncate">
           {getPageTitle()}
         </h2>
       </div>
 
       {/* Center: Tabs if options shown */}
       {showOptions && (
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-[var(--bg-secondary)] p-0.5 rounded-md border border-[var(--border-color)] text-[var(--text-primary)] transition-colors duration-300">
+        <div className="order-3 w-full md:order-none md:w-auto md:absolute md:left-1/2 md:-translate-x-1/2 flex items-center justify-center">
+          <div className="flex flex-wrap items-center justify-center bg-[var(--bg-secondary)] p-0.5 rounded-md border border-[var(--border-color)] text-[var(--text-primary)] transition-colors duration-300">
           <button 
             onClick={() => setActiveTab("code")}
-            className={`px-3 py-1 text-[11px] font-medium rounded-sm transition-colors ${activeTab === 'code' ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+            className={`px-2.5 md:px-3 py-1 text-[11px] font-medium rounded-sm transition-colors ${activeTab === 'code' ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
           >
             Code
           </button>
           <button 
             onClick={() => setActiveTab("preview")}
-            className={`px-3 py-1 text-[11px] font-medium rounded-sm transition-colors ${activeTab === 'preview' ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+            className={`px-2.5 md:px-3 py-1 text-[11px] font-medium rounded-sm transition-colors ${activeTab === 'preview' ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
           >
             Preview
           </button>
         </div>
+        </div>
       )}
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center flex-wrap justify-end gap-1.5 md:gap-2.5 shrink-0 min-w-0">
         {showOptions && onEnhanceUI && (
           <button 
             onClick={onEnhanceUI} 
             disabled={isGenerating}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--accent)] hover:bg-blue-600 text-white rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 text-xs font-medium bg-[var(--accent)] hover:bg-blue-600 text-white rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Sparkles size={13} className={isGenerating ? "animate-pulse" : ""} />
             {isGenerating ? "Enhancing..." : "Enhance UI"}
@@ -104,7 +106,7 @@ const Navbar = ({ showOptions, activeTab, setActiveTab, onEnhanceUI, isGeneratin
         {/* User Section */}
         {user ? (
           <>
-            <div className="w-px h-3.5 bg-[var(--border-color)] mx-1" />
+            <div className="hidden sm:block w-px h-3.5 bg-[var(--border-color)] mx-1" />
             <Link
               to="/profile"
               className="flex items-center p-0.5 rounded-full hover:bg-[var(--bg-secondary)] transition-colors group"

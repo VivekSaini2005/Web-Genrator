@@ -33,8 +33,8 @@ const Sidebar = () => {
 
   return (
     <aside 
-      className={`relative h-full bg-[var(--bg-primary)] border-r border-[var(--border-color)] flex flex-col transition-all duration-300 ease-in-out ${
-        isCollapsed ? 'w-16' : 'w-56'
+      className={`app-sidebar-responsive relative h-full min-w-0 max-w-full overflow-auto bg-[var(--bg-primary)] border-r border-[var(--border-color)] flex flex-col transition-all duration-300 ease-in-out ${
+        isCollapsed ? 'sidebar-collapsed w-16' : 'sidebar-expanded w-56'
       } z-50`}
     >
       <button

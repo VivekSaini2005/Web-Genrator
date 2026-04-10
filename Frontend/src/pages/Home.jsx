@@ -140,13 +140,13 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="h-screen w-full flex bg-[var(--bg-primary)] font-sans overflow-hidden transition-colors duration-300">
+    <div className="home-layout-fluid h-screen w-full flex bg-[var(--bg-primary)] font-sans overflow-hidden transition-colors duration-300">
 
       {/* SECTION 1: SIDEBAR (LEFT) */}
       <Sidebar />
 
       {/* SECTION 2: MAIN CONTENT (RIGHT) */}
-      <main className="flex-1 flex flex-col relative min-w-0 transition-colors duration-300">
+      <main className="workspace-layout-fluid flex-1 flex flex-col relative min-w-0 transition-colors duration-300">
         
         {/* Header / Workspace Navbar */}
         <Navbar 
@@ -156,8 +156,8 @@ const Home = () => {
           onEnhanceUI={handleEnhanceUI}
         />
         {/* Content Area */}
-        <div className="flex-1 overflow-hidden relative flex justify-center">
-          <div className="w-full max-w-[1400px] h-full flex flex-col">
+        <div className="workspace-content-fluid flex-1 overflow-hidden relative flex justify-center">
+          <div className="workspace-shell-fluid w-full max-w-[1400px] h-full flex flex-col">
             {!currentChatId ? (
               <section className="flex-1 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500">
                 <div className="w-full max-w-3xl px-6 flex flex-col justify-center py-20 fade-in">
@@ -172,10 +172,10 @@ const Home = () => {
                  </div>
               </section>
             ) : (
-              <div className="flex-1 flex animate-in fade-in zoom-in-95 duration-500 border-x border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm my-4 rounded-xl overflow-hidden min-h-0 mx-4">
+              <div className="workspace-panel-fluid chat-editor-preview-layout flex-1 flex animate-in fade-in zoom-in-95 duration-500 border-x border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm my-4 rounded-xl overflow-hidden min-h-0 mx-4">
                 {/* LEFT PANE: Chat */}
-                  <section className="w-[40%] flex flex-col border-r border-[var(--border-color)] relative overflow-hidden bg-[var(--bg-secondary)] transition-colors duration-300">
-                  <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar pt-6 pb-32">
+                  <section className="chat-layout-section w-[40%] flex flex-col border-r border-[var(--border-color)] relative overflow-hidden bg-[var(--bg-secondary)] transition-colors duration-300 min-w-0 min-h-0">
+                  <div className="chat-scroll-area flex-1 overflow-y-auto scroll-smooth custom-scrollbar pt-6 pb-32">
                     <div className="w-full px-6 min-h-full flex flex-col">
                         <div className="flex-1 text-slate-900 dark:text-white space-y-6">
                             {messages.length > 0 ? (
@@ -198,10 +198,10 @@ const Home = () => {
               </section>
 
               {/* RIGHT PANE: Code / Preview */}
-              <section className="w-[60%] flex flex-col bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 relative">
+                <section className="editor-preview-layout-section w-[60%] flex flex-col bg-[var(--bg-tertiary)] overflow-hidden transition-colors duration-300 relative min-w-0 min-h-0">
                  {activeTab === "code" ? (
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                      <div className="h-full relative bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-[var(--shadow-sm)] rounded-xl overflow-hidden transition-colors duration-300 flex flex-col">
+                    <div className="editor-scroll-area monaco-editor-container-fluid flex-1 overflow-y-auto custom-scrollbar p-6 min-h-0 min-w-0">
+                      <div className="editor-shell-fluid h-full relative bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-[var(--shadow-sm)] rounded-xl overflow-hidden transition-colors duration-300 flex flex-col">
                         <div className="flex items-center gap-1 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2 shrink-0">
                           {fileNames.map(fileName => (
                             <button key={fileName} onClick={() => setActiveFileTab(fileName)} className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${activeFileTab === fileName ? "bg-[var(--bg-primary)] text-[var(--accent)] shadow-sm" : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]"}`}>{fileName}</button>
@@ -213,7 +213,7 @@ const Home = () => {
                             <span className="text-xs font-medium">Reset Code</span>
                           </button>
                         )}
-                        <div className="flex-1 w-full pb-2 relative">
+                        <div className="monaco-host-fluid flex-1 w-full pb-2 relative overflow-hidden">
                           {(isGenerating || isPreviewLoading) ? (
                             <CodeShimmer />
                           ) : (
@@ -229,6 +229,7 @@ const Home = () => {
                                 wordWrap: "on",
                                 scrollBeyondLastLine: false,
                                 readOnly: false,
+                                automaticLayout: true,
                                 padding: { top: 16, bottom: 16 },
                               }}
                             />
@@ -236,8 +237,10 @@ const Home = () => {
                         </div>
                       </div>
                     </div>
-                 ) : (
-                    <Preview />
+                  ) : (
+                    <div className="preview-scroll-area flex-1 min-h-0 min-w-0 overflow-y-auto">
+                     <Preview />
+                    </div>
                  )}
               </section>
             </div>

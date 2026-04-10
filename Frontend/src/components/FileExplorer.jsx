@@ -98,7 +98,7 @@ const FileExplorer = ({ setCode, currentFile = "main.jsx" }) => {
   };
 
   return (
-    <div className="w-64 h-full bg-slate-900 border border-white/10 rounded-2xl flex flex-col overflow-hidden shadow-2xl transition-all">
+    <div className="file-explorer-responsive w-64 h-full min-w-0 max-w-full bg-slate-900 border border-white/10 rounded-2xl flex flex-col overflow-auto shadow-2xl transition-all">
       {/* Search Header */}
       <div className="p-4 border-b border-white/5 bg-white/2 shrink-0">
         <div className="flex items-center justify-between mb-4 px-1">
