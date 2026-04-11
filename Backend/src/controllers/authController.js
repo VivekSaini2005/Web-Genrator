@@ -68,14 +68,14 @@ const generateRefreshToken = (user) =>
 /**
  * Set the refresh token as a secure httpOnly cookie.
  * httpOnly = JavaScript cannot read it (XSS protection)
- * sameSite = 'lax' works in Postman and same-origin browsers
+ * sameSite = 'none' allows cross-site requests from the frontend
  */
 const setRefreshCookie = (res, token) => {
   res.cookie("refreshToken", token, {
-    httpOnly: true,                       // Cannot be accessed by JS — XSS safe
-    secure: process.env.NODE_ENV === "production", // HTTPS only in production
-    sameSite: "lax",                      // Works in Postman + same-site browsers
-    maxAge: REFRESH_TOKEN_EXPIRY_MS,      // 7 days (in milliseconds)
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: REFRESH_TOKEN_EXPIRY_MS,
   });
 };
 
@@ -85,8 +85,8 @@ const setRefreshCookie = (res, token) => {
 const clearRefreshCookie = (res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "None",
   });
 };
 
@@ -260,22 +260,28 @@ export const logout = async (req, res) => {
 // ─────────────────────────────────────────────
 // CONTROLLER: REFRESH TOKEN
 // POST /api/auth/refresh
-// Body: { refreshToken } OR cookie named 'refreshToken'
+// Cookie named 'refreshToken'
 // ─────────────────────────────────────────────
 export const refreshToken = async (req, res) => {
   try {
-    // Cookie = normal flow | Body = Postman testing
-    const token = req.cookies?.refreshToken || req.body?.refreshToken;
+    const token = req.cookies?.refreshToken;
+
+    console.info("[AUTH] Refresh token attempt received.");
 
     if (!token) {
-      return errorResponse(res, 400, "Refresh token is required.");
+      console.warn("[AUTH] Refresh attempt missing refreshToken cookie.");
+      clearRefreshCookie(res);
+      return errorResponse(res, 401, "Refresh token is required.");
     }
 
     // ── Verify JWT Signature + Expiry ─────────
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-    } catch {
+    } catch (error) {
+      console.warn("[AUTH] Invalid refresh token detected:", error.name);
+      await deleteRefreshToken(token);
+      clearRefreshCookie(res);
       return errorResponse(res, 401, "Invalid or expired refresh token.");
     }
 
@@ -283,17 +289,40 @@ export const refreshToken = async (req, res) => {
     // Ensures token hasn't been revoked (e.g., after logout)
     const session = await findRefreshToken(token);
     if (!session) {
+      console.warn(`[AUTH] Refresh token not found in DB for user ${decoded.id}.`);
+      await deleteRefreshToken(token);
+      clearRefreshCookie(res);
       return errorResponse(res, 401, "Refresh token has been revoked.");
     }
 
     // Double-check DB-stored expiry as a second layer of validation
     if (new Date() > new Date(session.expires_at)) {
-      await deleteRefreshToken(token); // Clean up expired session
+      console.warn(`[AUTH] Refresh session expired for user ${decoded.id}.`);
+      await deleteRefreshToken(token);
+      clearRefreshCookie(res);
       return errorResponse(res, 401, "Session expired. Please log in again.");
     }
 
-    // ── Issue New Access Token ────────────────
-    const accessToken = generateAccessToken({ id: decoded.id, email: decoded.email });
+    // ── Load user and issue new tokens ────────
+    const user = await findUserById(decoded.id);
+    if (!user) {
+      console.warn(`[AUTH] Refresh session is valid but user ${decoded.id} no longer exists.`);
+      await deleteRefreshToken(token);
+      clearRefreshCookie(res);
+      return errorResponse(res, 401, "User session is no longer valid.");
+    }
+
+    const accessToken = generateAccessToken(user);
+
+    // Optional refresh token rotation: issue a fresh refresh token and revoke the old one.
+    const rotatedRefreshToken = generateRefreshToken(user);
+    const rotatedExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
+
+    await deleteRefreshToken(token);
+    await storeRefreshToken(user.id, rotatedRefreshToken, rotatedExpiresAt);
+    setRefreshCookie(res, rotatedRefreshToken);
+
+    console.info(`[AUTH] Refresh token rotated successfully for user ${user.id}.`);
 
     return successResponse(res, 200, "Token refreshed successfully.", { accessToken });
 

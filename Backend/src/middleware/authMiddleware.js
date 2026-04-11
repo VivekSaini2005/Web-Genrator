@@ -48,7 +48,7 @@ export const verifyToken = (req, res, next) => {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({
         success: false,
-        error: "Token has expired. Please refresh your session.",
+        error: "TOKEN_EXPIRED",
       });
     }
 
@@ -56,7 +56,7 @@ export const verifyToken = (req, res, next) => {
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({
         success: false,
-        error: "Invalid token. Please log in again.",
+        error: "INVALID_TOKEN",
       });
     }
 

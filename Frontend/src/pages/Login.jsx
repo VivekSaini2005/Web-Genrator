@@ -20,7 +20,6 @@ const Login = () => {
       const res = await apiClient.post('/auth/login', { email, password });
       if (res.data.accessToken) {
         localStorage.setItem('token', res.data.accessToken);
-        localStorage.setItem('accessToken', res.data.accessToken);
         window.location.href = '/';
       }
     } catch (err) {
@@ -39,7 +38,6 @@ const Login = () => {
       });
       if (res.data.accessToken) {
         localStorage.setItem('token', res.data.accessToken);
-        localStorage.setItem('accessToken', res.data.accessToken);
         window.location.href = '/';
       }
     } catch (err) {

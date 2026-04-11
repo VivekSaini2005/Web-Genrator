@@ -21,7 +21,6 @@ const Register = () => {
       const res = await apiClient.post('/auth/register', { name, email, password });
       if (res.data.accessToken) {
         localStorage.setItem('token', res.data.accessToken);
-        localStorage.setItem('accessToken', res.data.accessToken);
         window.location.href = '/';
       }
     } catch (err) {
@@ -40,7 +39,6 @@ const Register = () => {
       });
       if (res.data.accessToken) {
         localStorage.setItem('token', res.data.accessToken);
-        localStorage.setItem('accessToken', res.data.accessToken);
         window.location.href = '/';
       }
     } catch (err) {

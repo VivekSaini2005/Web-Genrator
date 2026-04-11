@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }) => {
           console.error("Session expired or invalid token", error);
           // Token is invalid, clear it
           localStorage.removeItem('token');
-          localStorage.removeItem('accessToken');
           setToken(null);
           setUser(null);
         }

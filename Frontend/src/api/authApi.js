@@ -11,8 +11,7 @@ export const register = async (data) => {
     const { user, accessToken } = response.data;
     
     if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('token', accessToken); // fallback matching interceptor
+      localStorage.setItem('token', accessToken);
     }
     
     return user;
@@ -33,8 +32,7 @@ export const login = async (data) => {
     const { user, accessToken } = response.data;
     
     if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('token', accessToken); // fallback matching interceptor
+      localStorage.setItem('token', accessToken);
     }
     
     return user;
@@ -57,7 +55,6 @@ export const logout = async () => {
   } finally {
     // Always clear tokens from localStorage regardless of API success
     localStorage.removeItem('token');
-    localStorage.removeItem('accessToken');
   }
 };
 

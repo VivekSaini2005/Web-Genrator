@@ -12,21 +12,10 @@ import { testDBConnection } from "./src/config/db.js";
 dotenv.config();
 
 const app = express();
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://web-genrator.vercel.app",
-];
+const frontendOrigin = process.env.FRONTEND_URL || "https://web-genrator.vercel.app";
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error("Not allowed by CORS"));
-  },
+  origin: [frontendOrigin, "http://localhost:5173"],
   credentials: true,
 }));
 
