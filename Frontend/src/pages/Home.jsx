@@ -48,6 +48,13 @@ const Home = () => {
     return () => clearTimeout(swapTimer);
   }, [activeView, renderedView]);
 
+  // When user switches to a different chat from history, default to code view.
+  useEffect(() => {
+    if (currentChatId) {
+      setActiveView("preview");
+    }
+  }, [currentChatId]);
+
   /* eslint-disable react-hooks/set-state-in-effect */
   // Subscribe to navigation events from sidebar "New Chat" click to reset prompt
   useEffect(() => {
